@@ -1,0 +1,13 @@
+package io.apirun.api.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(value = "/api/automation")
+public class ApiNegtiveTestCaseController {
+
+
+
+
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.UsersAddWithActivityMapper">
+    <resultMap id="BaseResultMap" type="io.apirun.dto.UserActivityDTO">
+        <result column="activityUserNum" property="activityUserNum" jdbcType="INTEGER"/>
+        <result column="newUserNum" property="newUserNum" jdbcType="INTEGER"/>
+        <result column="activityTime" property="activityTime" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="getUserAddWithActivityMapper" resultMap="BaseResultMap">
+        SELECT t.user_online + IFNULL(t1.new_user, 0) activityUserNum,
+               IFNULL(t1.new_user, 0)                 newUserNum,
+               t.activity_time                        activityTime
+        from (SELECT count(DISTINCT (oper_user)) user_online, FROM_UNIXTIME(oper_time / 1000, #{format}) activity_time
+              FROM operating_log
+              where FROM_UNIXTIME(oper_time / 1000, #{format}) BETWEEN DATE_FORMAT(#{begin_time}, #{format}) and DATE_FORMAT(#{end_time}, #{format})
+              GROUP BY activity_time) t
+                 LEFT JOIN (SELECT count(id) as new_user, FROM_UNIXTIME(create_time / 1000, #{format}) add_time
+                            FROM user
+                            GROUP BY add_time
+                            HAVING add_time BETWEEN DATE_FORMAT(#{begin_time}, #{format}) and DATE_FORMAT(#{end_time}, #{format})) t1
+                            on t.activity_time = t1.add_time
+
+    </select>
+</mapper>

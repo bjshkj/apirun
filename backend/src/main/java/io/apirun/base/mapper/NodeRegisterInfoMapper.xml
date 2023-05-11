@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.NodeRegisterInfoMapper">
+  <resultMap id="BaseResultMap" type="io.apirun.base.domain.NodeRegisterInfo">
+    <id column="node_id" jdbcType="VARCHAR" property="nodeId" />
+    <result column="ip" jdbcType="VARCHAR" property="ip" />
+    <result column="secret_key" jdbcType="VARCHAR" property="secretKey" />
+    <result column="max_load" jdbcType="INTEGER" property="maxLoad" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="node_status" jdbcType="VARCHAR" property="nodeStatus" />
+    <result column="status_msg" jdbcType="VARCHAR" property="statusMsg" />
+    <result column="total_tasks" jdbcType="INTEGER" property="totalTasks" />
+    <result column="create_time" jdbcType="BIGINT" property="createTime" />
+    <result column="update_time" jdbcType="BIGINT" property="updateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    node_id, ip, secret_key, max_load, `type`, node_status, status_msg, total_tasks, 
+    create_time, update_time
+  </sql>
+  <select id="selectByExample" parameterType="io.apirun.base.domain.NodeRegisterInfoExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from node_register_info
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from node_register_info
+    where node_id = #{nodeId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from node_register_info
+    where node_id = #{nodeId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="io.apirun.base.domain.NodeRegisterInfoExample">
+    delete from node_register_info
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="io.apirun.base.domain.NodeRegisterInfo">
+    insert into node_register_info (node_id, ip, secret_key, 
+      max_load, `type`, node_status, 
+      status_msg, total_tasks, create_time, 
+      update_time)
+    values (#{nodeId,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR}, #{secretKey,jdbcType=VARCHAR}, 
+      #{maxLoad,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR}, #{nodeStatus,jdbcType=VARCHAR}, 
+      #{statusMsg,jdbcType=VARCHAR}, #{totalTasks,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT}, 
+      #{updateTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="io.apirun.base.domain.NodeRegisterInfo">
+    insert into node_register_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="nodeId != null">
+        node_id,
+      </if>
+      <if test="ip != null">
+        ip,
+      </if>
+      <if test="secretKey != null">
+        secret_key,
+      </if>
+      <if test="maxLoad != null">
+        max_load,
+      </if>
+      <if test="type != null">
+        `type`,
+      </if>
+      <if test="nodeStatus != null">
+        node_status,
+      </if>
+      <if test="statusMsg != null">
+        status_msg,
+      </if>
+      <if test="totalTasks != null">
+        total_tasks,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="nodeId != null">
+        #{nodeId,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null">
+        #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="secretKey != null">
+        #{secretKey,jdbcType=VARCHAR},
+      </if>
+      <if test="maxLoad != null">
+        #{maxLoad,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeStatus != null">
+        #{nodeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="statusMsg != null">
+        #{statusMsg,jdbcType=VARCHAR},
+      </if>
+      <if test="totalTasks != null">
+        #{totalTasks,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="io.apirun.base.domain.NodeRegisterInfoExample" resultType="java.lang.Long">
+    select count(*) from node_register_info
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update node_register_info
+    <set>
+      <if test="record.nodeId != null">
+        node_id = #{record.nodeId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.ip != null">
+        ip = #{record.ip,jdbcType=VARCHAR},
+      </if>
+      <if test="record.secretKey != null">
+        secret_key = #{record.secretKey,jdbcType=VARCHAR},
+      </if>
+      <if test="record.maxLoad != null">
+        max_load = #{record.maxLoad,jdbcType=INTEGER},
+      </if>
+      <if test="record.type != null">
+        `type` = #{record.type,jdbcType=VARCHAR},
+      </if>
+      <if test="record.nodeStatus != null">
+        node_status = #{record.nodeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="record.statusMsg != null">
+        status_msg = #{record.statusMsg,jdbcType=VARCHAR},
+      </if>
+      <if test="record.totalTasks != null">
+        total_tasks = #{record.totalTasks,jdbcType=INTEGER},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=BIGINT},
+      </if>
+      <if test="record.updateTime != null">
+        update_time = #{record.updateTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update node_register_info
+    set node_id = #{record.nodeId,jdbcType=VARCHAR},
+      ip = #{record.ip,jdbcType=VARCHAR},
+      secret_key = #{record.secretKey,jdbcType=VARCHAR},
+      max_load = #{record.maxLoad,jdbcType=INTEGER},
+      `type` = #{record.type,jdbcType=VARCHAR},
+      node_status = #{record.nodeStatus,jdbcType=VARCHAR},
+      status_msg = #{record.statusMsg,jdbcType=VARCHAR},
+      total_tasks = #{record.totalTasks,jdbcType=INTEGER},
+      create_time = #{record.createTime,jdbcType=BIGINT},
+      update_time = #{record.updateTime,jdbcType=BIGINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="io.apirun.base.domain.NodeRegisterInfo">
+    update node_register_info
+    <set>
+      <if test="ip != null">
+        ip = #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="secretKey != null">
+        secret_key = #{secretKey,jdbcType=VARCHAR},
+      </if>
+      <if test="maxLoad != null">
+        max_load = #{maxLoad,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        `type` = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeStatus != null">
+        node_status = #{nodeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="statusMsg != null">
+        status_msg = #{statusMsg,jdbcType=VARCHAR},
+      </if>
+      <if test="totalTasks != null">
+        total_tasks = #{totalTasks,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where node_id = #{nodeId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.apirun.base.domain.NodeRegisterInfo">
+    update node_register_info
+    set ip = #{ip,jdbcType=VARCHAR},
+      secret_key = #{secretKey,jdbcType=VARCHAR},
+      max_load = #{maxLoad,jdbcType=INTEGER},
+      `type` = #{type,jdbcType=VARCHAR},
+      node_status = #{nodeStatus,jdbcType=VARCHAR},
+      status_msg = #{statusMsg,jdbcType=VARCHAR},
+      total_tasks = #{totalTasks,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=BIGINT},
+      update_time = #{updateTime,jdbcType=BIGINT}
+    where node_id = #{nodeId,jdbcType=VARCHAR}
+  </update>
+</mapper>

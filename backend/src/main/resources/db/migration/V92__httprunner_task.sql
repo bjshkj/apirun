@@ -1,0 +1,35 @@
+CREATE TABLE IF NOT EXISTS httprunner_task(
+  id VARCHAR(50) PRIMARY KEY  COMMENT 'httpruner task id',
+  task_name VARCHAR(200) not NULL COMMENT 'httpruner_task name',
+  project_id VARCHAR(50) not NULL COMMENT 'project id',
+  git_version VARCHAR(100) not NULL COMMENT 'git commit version',
+  debug_mode VARCHAR(20) COMMENT 'the level of log,DEBUG/INFO',
+  git_ver_desc VARCHAR(200) COMMENT 'the path of the git file',
+  exec_case_paths VARCHAR(200) not NULL COMMENT 'the path of the git file',
+  dot_env_path VARCHAR(200) COMMENT 'the path of the ENV file',
+  hosts_path VARCHAR(200) COMMENT 'the path of the host file',
+  create_user VARCHAR(100) COMMENT 'username of the operator',
+  task_status VARCHAR(25) DEFAULT 0 COMMENT 'the status of the task 0-创建完成 1-派发中、2-排队中、3-执行中、4-执行成功/5-执行失败/6-平台失败',
+  ctime bigint(13) COMMENT 'the time of the task create',
+  utime bigint(13) COMMENT 'the time of the task update',
+  node_id VARCHAR(50) COMMENT 'the nodeid of execut the taks',
+  image VARCHAR(100) COMMENT 'the name of the docker',
+  stime bigint(13) COMMENT 'the time of the task starting',
+  ftime bigint(13) COMMENT 'the time of the task finished',
+  tcases_total int(10) DEFAULT 0 COMMENT 'testcases total count',
+  tcases_success int(10) DEFAULT 0 COMMENT 'testcases success count',
+  tcases_fail int(10) DEFAULT 0 COMMENT 'testcases failed count',
+  tsteps_total int(10) DEFAULT 0 COMMENT 'teststeps total count',
+  tsteps_failures int(10) DEFAULT 0 COMMENT 'teststeps failed count',
+  tsteps_errors int(10) DEFAULT 0 COMMENT 'teststeps error count',
+  tsteps_skipped int(10) DEFAULT 0 COMMENT 'teststeps Skipped count',
+  tsteps_expected_failures int(10) DEFAULT 0 COMMENT 'teststeps Expected Failures count',
+  tsteps_unexpected_successes int(10) DEFAULT 0 COMMENT 'teststeps Unexpected Successes  count',
+  tsteps_successes int(10) DEFAULT 0 COMMENT 'teststeps Success  count',
+  duration bigint(13) COMMENT 'the time execut the task',
+  platform longtext COMMENT 'the execut info of the platform',
+  test_log_id VARCHAR(100) COMMENT 's3key the log place on S3'
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+ALTER TABLE httprunner_task ADD trigger_model VARCHAR(200) after hosts_path;
+ALTER TABLE httprunner_task MODIFY duration DOUBLE unsigned DEFAULT NULL;

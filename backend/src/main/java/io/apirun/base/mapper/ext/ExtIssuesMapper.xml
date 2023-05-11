@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.apirun.base.mapper.ext.ExtIssuesMapper">
+
+    <select id="getIssuesByCaseId" resultType="io.apirun.base.domain.IssuesDao">
+        select issues.*
+        from issues
+        inner join test_case_issues
+        on test_case_issues.issues_id = issues.id
+        <include refid="queryWhereCondition"/>
+        <include refid="io.apirun.base.mapper.ext.ExtBaseMapper.orders"/>
+    </select>
+
+    <select id="getIssuesByProjectId" resultType="io.apirun.base.domain.IssuesDao">
+        select issues.id, issues.num, ifnull(issues.title, '') as title, issues.project_id, issues.create_time, issues.update_time,
+               ifnull(issues.description, '') as description, issues.status, issues.platform, issues.custom_fields, issues.reporter,
+               issues.creator,issues.resource_id,
+               issues.lastmodify
+        from issues
+        <include refid="queryWhereCondition"/>
+        <include refid="io.apirun.base.mapper.ext.ExtBaseMapper.orders"/>
+    </select>
+    <select id="getNextNum" resultType="io.apirun.base.domain.Issues">
+        SELECT * FROM issues WHERE issues.project_id = #{projectId} ORDER BY num DESC LIMIT 1;
+    </select>
+    <select id="getRelateIssues" resultType="io.apirun.base.domain.IssuesDao">
+        select issues.id, issues.num, issues.title, issues.project_id, issues.create_time, issues.update_time,
+        issues.description, issues.status, issues.platform, issues.custom_fields,
+        issues.lastmodify
+        from issues
+        left join
+        test_case_issues on issues.id = test_case_issues.issues_id
+        <include refid="queryWhereCondition"/>
+        and test_case_issues.issues_id is null
+        <include refid="io.apirun.base.mapper.ext.ExtBaseMapper.orders"/>
+    </select>
+
+    <sql id="queryWhereCondition">
+        <where>
+
+            <if test="request.name != null">
+                and issues.title LIKE CONCAT('%', #{request.name}, '%')
+            </if>
+
+            <if test="request.projectId != null and request.projectId != ''">
+                and issues.project_id = #{request.projectId}
+            </if>
+
+            <if test="request.testCaseId != null and request.testCaseId != ''">
+                and test_case_issues.test_case_id = #{request.testCaseId}
+            </if>
+
+            <if test="request.platform != null and request.platform != ''">
+                and issues.platform = #{request.platform}
+            </if>
+
+<!--            <if test="request.ids != null and request.ids.size() > 0">-->
+<!--                and issues.id in-->
+<!--                <foreach collection="request.ids" item="id" separator="," open="(" close=")">-->
+<!--                    #{id}-->
+<!--                </foreach>-->
+<!--            </if>-->
+
+
+<!--            <if test="request.filters != null and request.filters.size() > 0">-->
+<!--                <foreach collection="request.filters.entrySet()" index="key" item="values">-->
+<!--                    <if test="values != null and values.size() > 0">-->
+<!--                        <choose>-->
+<!--                            <when test="key == 'scene'">-->
+<!--                                AND cf.scene IN-->
+<!--                                <foreach collection="values" item="value" separator="," open="(" close=")">-->
+<!--                                    #{value}-->
+<!--                                </foreach>-->
+<!--                            </when>-->
+<!--                        </choose>-->
+<!--                    </if>-->
+<!--                </foreach>-->
+<!--            </if>-->
+
+        </where>
+    </sql>
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.apirun.base.mapper.ext.ExtWorkspaceUserActivityMapper">
+
+    <resultMap id="resultMap" type="io.apirun.dto.StatisticsUserRankingDTO">
+        <result column="uname" property="uname" jdbcType="VARCHAR"/>
+        <result column="operCount" property="operCount" jdbcType="INTEGER"/>
+    </resultMap>
+    <select id="getWorkspaceUserActivity"  resultMap="resultMap">
+        select u.name uname, sum(t.oper_count) operCount
+        from (select distinct (ol.oper_user) oper_user, p.workspace_id, count(ol.id) as oper_count
+              from operating_log ol
+                       join project p on p.id = ol.project_id
+              where p.workspace_id = #{workspace_id,jdbcType=VARCHAR}
+                and date_format(from_unixtime(ol.oper_time / 1000), '%Y-%m-%d') between #{begin_time,jdbcType=VARCHAR} AND #{end_time,jdbcType=VARCHAR}
+              group by ol.oper_user, ol.project_id
+              order by oper_count desc) t
+                 join user u on u.id = t.oper_user
+        group by uname
+        order by operCount desc
+    </select>
+
+
+</mapper>

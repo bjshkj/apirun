@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.HttpRunnerTestCaseResultMapper">
+    <resultMap id="BaseResultMap" type="io.apirun.base.domain.TestCaseResult">
+        <id column="task_id" jdbcType="VARCHAR" property="taskId" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="idx" jdbcType="TINYINT" property="index" />
+        <result column="start_time" jdbcType="TIMESTAMP" property="startTime" javaType="java.util.Date" />
+        <result column="success" jdbcType="TINYINT" property="success"/>
+        <result column="duration" jdbcType="DOUBLE" property="duration" />
+        <result column="ins" jdbcType="LONGVARCHAR" property="in" />
+        <result column="out" jdbcType="LONGVARCHAR" property="out" />
+        <result property="stepStatInfo.total" column="step_total" jdbcType="TINYINT"/>
+        <result property="stepStatInfo.failures" column="step_failures" jdbcType="TINYINT" />
+        <result property="stepStatInfo.errors" column="step_errors" jdbcType="TINYINT"/>
+        <result property="stepStatInfo.skipped" column="step_skipped" jdbcType="TINYINT"/>
+        <result property="stepStatInfo.expectedFailures" column="step_expected_failures" jdbcType="TINYINT"/>
+        <result property="stepStatInfo.unexpectedSuccesses" column="step_unexpected_successes" jdbcType="TINYINT" />
+        <result property="stepStatInfo.successes" column="step_successes" jdbcType="TINYINT" />
+    </resultMap>
+
+    <insert id="saveTestCaseResult" parameterType="io.apirun.base.domain.TestCaseResult">
+        insert into api_test_case_summary (
+        `task_id`,`name`, `idx`,`start_time`, `success`,
+        `duration`, `ins`, `out`,`step_total`,`step_failures`,`step_errors`,`step_skipped`,
+        `step_expected_failures`, `step_unexpected_successes`, `step_successes`
+        )
+        values
+        (
+        #{taskId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{index,jdbcType=TINYINT},
+        #{startTime,jdbcType=TIMESTAMP}, #{success,jdbcType=TINYINT},
+        #{duration,jdbcType=DOUBLE},
+        #{in,jdbcType=LONGVARCHAR}, #{out,jdbcType=LONGVARCHAR}, #{stepStatInfo.total,jdbcType=TINYINT},
+        #{stepStatInfo.failures,jdbcType=TINYINT}, #{stepStatInfo.errors,jdbcType=TINYINT},
+        #{stepStatInfo.skipped,jdbcType=TINYINT},
+        #{stepStatInfo.expectedFailures,jdbcType=TINYINT}, #{stepStatInfo.unexpectedSuccesses,jdbcType=TINYINT},
+        #{stepStatInfo.successes,jdbcType=TINYINT}
+        )
+    </insert>
+
+    <sql id="Base_Column_List">
+        `task_id`,`name`, `idx`,`start_time`, `success`,
+        `duration`, `ins`, `out`,`step_total`,`step_failures`,`step_errors`,`step_skipped`,
+        `step_expected_failures`, `step_unexpected_successes`, `step_successes`
+    </sql>
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from api_test_case_summary
+        where task_id=#{reportId}
+        order by idx asc
+    </select>
+
+    <delete id="delTestCaseResultByTaskId">
+        delete
+        from api_test_case_summary
+        where task_id=#{reportId}
+    </delete>
+</mapper>

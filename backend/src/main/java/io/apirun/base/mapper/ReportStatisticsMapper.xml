@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.ReportStatisticsMapper">
+    <resultMap id="ProjectTypeResultMap" type="io.apirun.statistics.dto.ProjectTypeDTO">
+        <id column="number" jdbcType="INTEGER" property="number"></id>
+        <id column="project_type" jdbcType="VARCHAR" property="projectType"></id>
+    </resultMap>
+    <resultMap id="EveryDayDataResultMap" type="io.apirun.statistics.dto.EveryDayDataDTO">
+        <id column="count" jdbcType="INTEGER" property="count"></id>
+        <id column="date" jdbcType="VARCHAR" property="date"></id>
+    </resultMap>
+    <select id="countApi" resultType="java.lang.Long">
+        select count(api_definition.id)
+        from api_definition,project
+        where api_definition.project_id=project.id
+          <if test="workspaceId != null">
+              and project.workspace_id=#{workspaceId}
+          </if>
+    </select>
+    <select id="countCase" resultType="java.lang.Long">
+        select count(api_test_case.id)
+        from api_test_case,project
+        where api_test_case.project_id=project.id
+        <if test="workspaceId != null">
+            and project.workspace_id=#{workspaceId}
+        </if>
+    </select>
+    <select id="countScene" resultType="java.lang.Long">
+        select count(api_scenario.id)
+        from api_scenario,project
+        where api_scenario.project_id=project.id
+        <if test="workspaceId != null">
+            and project.workspace_id=#{workspaceId}
+        </if>
+    </select>
+    <select id="countPerformance" resultType="java.lang.Long">
+        select count(load_test.id)
+        from load_test,project
+        where load_test.project_id=project.id
+        <if test="workspaceId != null">
+            and project.workspace_id=#{workspaceId}
+        </if>
+    </select>
+    <select id="countHttpRunner" resultType="java.lang.Long">
+        select count(httprunner_task.id)
+        from httprunner_task,project
+        where httprunner_task.project_id=project.id
+        <if test="workspaceId != null">
+            and project.workspace_id=#{workspaceId}
+        </if>
+    </select>
+    <select id="countProjectTypeByWorkerSpacesIDNewNum" resultType="java.lang.Integer">
+        select count(id)
+        from project
+        where
+            project_type=#{projectType} and
+            create_time between #{beginTime} and #{endTime}
+    </select>
+    <select id="countProjectTypeByWorkerSpacesIDInTimeSpace" resultMap="ProjectTypeResultMap">
+        select count(id) as number,project_type
+        from project
+        <if test="workspaceId != null">
+        where
+            workspace_id=#{workspaceId}
+        </if>
+        GROUP BY project_type
+    </select>
+
+    <select id="countApiInTimeSpace" resultMap="EveryDayDataResultMap">
+        select count(`date`)as `count`,`date`
+        from (  select
+                    FROM_UNIXTIME(create_time/1000,#{dataSpan}) `date`
+                    from api_definition
+                    where create_time
+                    between #{beginTime} and #{endTime}
+                    group by create_time
+                    order by create_time desc)t1
+        group by `date`
+    </select>
+    <select id="countCaseInTimeSpace" resultMap="EveryDayDataResultMap">
+        select count(`date`)as `count`,`date`
+        from (select FROM_UNIXTIME(create_time/1000,#{dataSpan}) `date` from api_test_case
+              where create_time between #{beginTime} and #{endTime} group by create_time order by create_time desc)t1
+        group by `date`
+    </select>
+    <select id="countSceneInTimeSpace" resultMap="EveryDayDataResultMap">
+        select count(`date`)as `count`,`date`
+        from (select FROM_UNIXTIME(create_time/1000,#{dataSpan}) `date` from api_scenario
+              where create_time between #{beginTime} and #{endTime} group by create_time order by create_time desc)t1
+        group by `date`
+    </select>
+    <select id="countPerformanceInTimeSpace" resultMap="EveryDayDataResultMap">
+        select count(`date`)as `count`,`date`
+        from (select FROM_UNIXTIME(create_time/1000,#{dataSpan}) `date` from load_test
+              where create_time between #{beginTime} and #{endTime} group by create_time order by create_time desc)t1
+        group by `date`
+    </select>
+    <select id="countHttpRunnerInTimeSpace" resultMap="EveryDayDataResultMap">
+        select count(`date`)as `count`,`date`
+        from (select FROM_UNIXTIME(ctime/1000,#{dataSpan}) `date` from httprunner_task
+              where ctime between #{beginTime} and #{endTime} group by ctime order by ctime desc)t1
+        group by `date`
+    </select>
+    <select id="countCasesInTimeSpace" resultMap="EveryDayDataResultMap">
+        select FROM_UNIXTIME(oper_time/1000,#{dataSpan})as `date`,
+            count(id) as `count`
+        from
+            operating_log
+        where
+            oper_time between #{beginTime} and #{endTime}
+            and oper_type REGEXP #{operType}
+            and oper_path REGEXP #{caseType}
+        group by
+            `date` order by `date` asc
+    </select>
+
+</mapper>

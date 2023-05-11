@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.ext.ExtApiDefinitionExecResultMapper">
+    <delete id="deleteByResourceId" parameterType="java.lang.String">
+      delete from api_definition_exec_result  where resource_id = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="selectMaxResultByResourceId" parameterType="java.lang.String" resultType="io.apirun.base.domain.ApiDefinitionExecResult">
+        select  * from api_definition_exec_result
+        where resource_id = #{resourceId,jdbcType=VARCHAR} ORDER BY create_time DESC LIMIT 1
+    </select>
+    <select id="selectMaxResultByResourceIdAndType"
+            resultType="io.apirun.base.domain.ApiDefinitionExecResult">
+        select  * from api_definition_exec_result
+        where resource_id = #{resourceId,jdbcType=VARCHAR}
+          and `type` = #{type, jdbcType=VARCHAR}
+        ORDER BY start_time DESC LIMIT 1
+    </select>
+
+    <select id="countByProjectIDAndCreateInThisWeek" resultType="java.lang.Long">
+        SELECT count(id) AS countNumber FROM api_definition_exec_result
+        WHERE resource_id IN (
+        SELECT testCase.id FROM api_test_case testCase
+        WHERE testCase.project_id = #{projectId})
+        and start_time BETWEEN #{firstDayTimestamp} AND #{lastDayTimestamp}
+    </select>
+
+    <select id="countByTestCaseIDInProject" resultType="java.lang.Long">
+        SELECT count(id) AS countNumber FROM api_definition_exec_result
+        WHERE resource_id IN (
+        SELECT testCase.id FROM api_test_case testCase
+        WHERE testCase.project_id = #{projectId})
+    </select>
+
+    <select id="findFaliureCaseInfoByProjectIDAndExecuteTimeAndLimitNumber" resultType="io.apirun.api.dto.datacount.ExecutedCaseInfoResult">
+        SELECT * FROM (
+            SELECT testCase.testCaseID,testCase.testCaseName AS caseName,testCase.testPlanName AS testPlan ,caseErrorCountData.dataCountNumber AS failureTimes,'apiCase' AS caseType
+            FROM (
+            SELECT apiCase.id AS testCaseID,apiCase.`name` AS testCaseName,group_concat(testPlan.`name`)  AS testPlanName, testPlanCase.update_time as updateTime
+            FROM api_test_case apiCase
+            inner join api_definition on api_definition.id = apiCase.api_definition_id
+           INNER JOIN test_plan_api_case testPlanCase ON testPlanCase.api_case_id = apiCase.id
+           INNER JOIN test_plan testPlan ON testPlan.id = testPlanCase.test_plan_id
+            and api_definition.status != 'Trash'
+            GROUP BY apiCase.id,testPlanCase.update_time
+            ORDER BY apiCase.create_time DESC
+            )testCase
+            INNER JOIN (
+                SELECT resource_id AS testCaseID,COUNT(id) AS dataCountNumber,start_time AS executeTime FROM api_definition_exec_result
+                WHERE resource_id IN (
+                SELECT id FROM api_test_case WHERE project_id = #{projectId}
+                ) and `status` = 'error' GROUP BY resource_id,start_time
+            ) caseErrorCountData ON caseErrorCountData.testCaseID =testCase.testCaseID
+            WHERE testCase.updateTime >= #{startTimestamp}
+            UNION
+            SELECT scene.id AS testCaseID,scene.`name` AS caseName,apiScene.testPlanName AS testPlan,count(report.id) AS failureTimes,'scenario' AS caseType
+            FROM api_scenario_report report
+            INNER JOIN api_scenario_report_detail reportDetail ON report.id = reportDetail.report_id
+            INNER JOIN api_scenario scene ON report.scenario_id = scene.id
+            INNER JOIN(
+                 SELECT apiScene.api_scenario_id, group_concat(testPlan.`name`) AS testPlanName
+                 FROM test_plan_api_scenario apiScene
+                 INNER JOIN test_plan testPlan ON testPlan.id = apiScene.test_plan_id
+                 GROUP BY apiScene.api_scenario_id
+             )apiScene ON apiScene.api_scenario_id = scene.id
+            WHERE report.project_id = #{projectId}
+              AND ( report.STATUS = 'Error' OR report.STATUS = 'Fail' )  AND report.create_time >= #{startTimestamp}
+            GROUP BY scene.id,scene.`name`,apiScene.testPlanName,'scenario'
+            UNION
+            SELECT ltr.test_id as testCaseID, ltr.name as caseName,tplt.testPlanName AS testPlan, count(ltr.id) as failureTimes, 'load' as caseType FROM load_test_report ltr
+            join load_test on load_test.id = ltr.test_id
+            JOIN (
+                select tplc.load_case_id, group_concat(tp.`name`) AS testPlanName, tp.project_id
+                from test_plan_load_case tplc
+                join test_plan tp on tp.id = tplc.test_plan_id
+                GROUP BY tplc.load_case_id,tp.project_id
+                ) tplt on tplt.load_case_id = ltr.test_id
+            WHERE load_test.project_id = #{projectId}
+              AND ltr.STATUS = 'Error' and ltr.trigger_mode = 'TEST_PLAN_SCHEDULE' AND ltr.create_time >= #{startTimestamp}
+            GROUP BY load_test.id,ltr.test_id,ltr.name,tplt.testPlanName,'load'
+          ) showTable
+        ORDER BY showTable.failureTimes DESC
+    </select>
+</mapper>

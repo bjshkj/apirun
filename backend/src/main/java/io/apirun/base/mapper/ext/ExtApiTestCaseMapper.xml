@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.ext.ExtApiTestCaseMapper">
+    <resultMap id="BaseResultMap" type="io.apirun.base.domain.ApiTestCase">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="project_id" jdbcType="VARCHAR" property="projectId"/>
+        <result column="api_definition_id" jdbcType="VARCHAR" property="apiDefinitionId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="priority" jdbcType="VARCHAR" property="priority"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="create_user_id" jdbcType="VARCHAR" property="createUserId"/>
+        <result column="update_user_id" jdbcType="VARCHAR" property="updateUserId"/>
+        <result column="create_time" jdbcType="BIGINT" property="createTime"/>
+        <result column="update_time" jdbcType="BIGINT" property="updateTime"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.apirun.base.domain.ApiTestCase">
+        <result column="request" jdbcType="LONGVARCHAR" property="request"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    id, project_id, name,api_definition_id,priority,description, create_user_id, update_user_id, create_time, update_time
+  </sql>
+    <sql id="Blob_Column_List">
+    request
+  </sql>
+    <select id="selectByExampleWithBLOBs" parameterType="io.apirun.base.domain.ApiTestCaseExample"
+            resultMap="ResultMapWithBLOBs">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from api_test_case
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+
+    <sql id="condition">
+        <choose>
+            <when test='${object}.operator == "like"'>
+                like CONCAT('%', #{${object}.value},'%')
+            </when>
+            <when test='${object}.operator == "not like"'>
+                not like CONCAT('%', #{${object}.value},'%')
+            </when>
+            <when test='${object}.operator == "in"'>
+                in
+                <foreach collection="${object}.value" item="v" separator="," open="(" close=")">
+                    #{v}
+                </foreach>
+            </when>
+            <when test='${object}.operator == "not in"'>
+                not in
+                <foreach collection="${object}.value" item="v" separator="," open="(" close=")">
+                    #{v}
+                </foreach>
+            </when>
+            <when test='${object}.operator == "between"'>
+                between #{${object}.value[0]} and #{${object}.value[1]}
+            </when>
+            <when test='${object}.operator == "gt"'>
+                &gt; #{${object}.value}
+            </when>
+            <when test='${object}.operator == "lt"'>
+                &lt; #{${object}.value}
+            </when>
+            <when test='${object}.operator == "ge"'>
+                &gt;= #{${object}.value}
+            </when>
+            <when test='${object}.operator == "le"'>
+                &lt;= #{${object}.value}
+            </when>
+            <when test='${object}.operator == "current user"'>
+                = '${@io.metersphere.commons.utils.SessionUtils@getUserId()}'
+            </when>
+            <otherwise>
+                = #{${object}.value}
+            </otherwise>
+        </choose>
+    </sql>
+    <sql id="combine">
+        <if test='${condition}.name != null and (${name} == null or ${name} == "")'>
+            and t1.name
+            <include refid="condition">
+                <property name="object" value="${condition}.name"/>
+            </include>
+        </if>
+        <if test="${condition}.updateTime != null">
+            and t1.update_time
+            <include refid="condition">
+                <property name="object" value="${condition}.updateTime"/>
+            </include>
+        </if>
+        <if test="${condition}.createTime != null">
+            and t1.create_time
+            <include refid="condition">
+                <property name="object" value="${condition}.createTime"/>
+            </include>
+        </if>
+        <if test="${condition}.priority != null">
+            and t1.priority
+            <include refid="condition">
+                <property name="object" value="${condition}.priority"/>
+            </include>
+        </if>
+        <if test="${condition}.creator != null">
+            and t1.create_user_id
+            <include refid="condition">
+                <property name="object" value="${condition}.creator"/>
+            </include>
+        </if>
+        <if test='${condition}.tags != null and ${objectKey}.operator == "not like"'>
+            and (t1.tags is null or t1.tags
+                <include refid="condition">
+                    <property name="object" value="${condition}.tags"/>
+                </include>
+            )
+        </if>
+        <if test='${condition}.tags != null and ${objectKey}.operator == "like"'>
+            and t1.tags
+            <include refid="condition">
+                <property name="object" value="${condition}.tags"/>
+            </include>
+        </if>
+
+        <if test="${condition}.status != null">
+            and t2.status
+            <include refid="condition">
+                <property name="object" value="${condition}.status"/>
+            </include>
+        </if>
+
+    </sql>
+
+    <select id="selectApiCaseInfoByPrimaryKey" resultType="io.apirun.api.dto.definition.ApiTestCaseInfo">
+        SELECT
+            t1.*,
+            a.method AS apiMethod
+        FROM
+            api_test_case t1
+            inner join api_definition a on  t1.api_definition_id = a.id
+        WHERE t1.id = #{0}
+    </select>
+
+    <select id="list" resultType="io.apirun.api.dto.definition.ApiTestCaseResult">
+        SELECT
+        t1.*,
+        t2.STATUS AS execResult,
+        t2.create_time AS execTime,
+        u2.NAME AS createUser,
+        u1.NAME AS updateUser,
+        a.method AS apiMethod
+        FROM
+        api_test_case t1
+        LEFT JOIN api_definition_exec_result t2 ON t1.last_result_id = t2.id
+        inner join api_definition a on  t1.api_definition_id = a.id
+        LEFT JOIN USER u1 ON t1.update_user_id = u1.id
+        LEFT JOIN USER u2 ON t1.create_user_id = u2.id
+        LEFT JOIN USER u3 ON t2.user_id = u3.id
+        <where>
+            <if test="request.name != null and request.name!=''">
+                and t1.name like CONCAT('%', #{request.name},'%')
+            </if>
+            <if test="request.id != null and request.id!=''">
+                AND t1.id = #{request.id}
+            </if>
+            <if test="request.priority != null and request.priority!=''">
+                AND t1.priority = #{request.priority}
+            </if>
+            <if test="request.projectId != null and request.projectId!=''">
+                AND t1.project_id = #{request.projectId}
+            </if>
+            <if test="request.apiDefinitionId != null and request.apiDefinitionId!=''">
+                AND t1.api_definition_id = #{request.apiDefinitionId}
+            </if>
+            <if test="request.moduleIds != null and request.moduleIds.size() > 0">
+                and a.module_id in
+                <foreach collection="request.moduleIds" item="nodeId" separator="," open="(" close=")">
+                    #{nodeId}
+                </foreach>
+            </if>
+            <if test="request.combine != null">
+                <include refid="combine">
+                    <property name="condition" value="request.combine"/>
+                    <property name="name" value="request.name"/>
+                    <property name="objectKey" value="request.combine.tags"/>
+                </include>
+            </if>
+        </where>
+
+        <if test="request.orders != null and request.orders.size() > 0">
+            order by
+            <foreach collection="request.orders" separator="," item="order">
+                t1.${order.name} ${order.type}
+            </foreach>
+        </if>
+
+    </select>
+
+    <select id="listSimple" resultType="io.apirun.api.dto.definition.ApiTestCaseDTO">
+        select
+        t1.id, t1.project_id, t1.name, t1.api_definition_id, t1.priority, t1.description, t1.create_user_id, t1.update_user_id, t1.create_time, t1.update_time, t1.num,
+        a.module_id, a.path, a.protocol, t1.tags,TRIM('"' from JSON_EXTRACT(t1.request, '$.path') )as casePath
+        from
+        api_test_case t1
+        LEFT JOIN api_definition_exec_result t2 ON t1.last_result_id = t2.id
+        inner join api_definition a on  t1.api_definition_id = a.id
+        <if test="request.protocol != null and request.protocol!=''">
+            and a.protocol = #{request.protocol}
+        </if>
+        <choose>
+            <when test="request.status == 'Trash'">
+                and a.status = 'Trash'
+            </when>
+            <otherwise>
+                and a.status != 'Trash'
+            </otherwise>
+        </choose>
+        <where>
+            <if test="request.combine != null">
+                <include refid="combine">
+                    <property name="condition" value="request.combine"/>
+                    <property name="name" value="request.name"/>
+                    <property name="objectKey" value="request.combine.tags"/>
+                </include>
+            </if>
+            <if test="request.projectId != null and request.projectId!=''">
+                and t1.project_id = #{request.projectId}
+            </if>
+            <if test="request.id != null and request.id!=''">
+                and t1.id = #{request.id}
+            </if>
+            <if test="request.ids != null and request.ids.size() > 0">
+                <if test="request.projectId != null and request.projectId!=''">
+                    and
+                </if>
+                t1.id in
+                <foreach collection="request.ids" item="caseId" separator="," open="(" close=")">
+                    #{caseId}
+                </foreach>
+            </if>
+            <if test="request.name != null and request.name!=''">
+                and (t1.name like CONCAT('%', #{request.name},'%')
+                         or t1.tags like CONCAT('%', #{request.name},'%')
+                         or t1.num like CONCAT('%', #{request.name},'%'))
+            </if>
+            <if test="request.createTime > 0">
+                and t1.create_time >= #{request.createTime}
+            </if>
+            <if test="request.moduleIds != null and request.moduleIds.size() > 0">
+                and a.module_id in
+                <foreach collection="request.moduleIds" item="nodeId" separator="," open="(" close=")">
+                    #{nodeId}
+                </foreach>
+            </if>
+            <if test="request.filters != null and request.filters.size() > 0">
+                <foreach collection="request.filters.entrySet()" index="key" item="values">
+                    <if test="values != null and values.size() > 0">
+                        <choose>
+                            <when test="key == 'priority'">
+                                and t1.priority in
+                                <foreach collection="values" item="value" separator="," open="(" close=")">
+                                    #{value}
+                                </foreach>
+                            </when>
+                        </choose>
+                    </if>
+                </foreach>
+            </if>
+        </where>
+        <if test="request.orders != null and request.orders.size() > 0">
+            order by
+            <foreach collection="request.orders" separator="," item="order">
+                ${order.name} ${order.type}
+            </foreach>
+        </if>
+    </select>
+    <select id="idSimple" resultType="java.lang.String">
+        select
+        t1.id
+        from
+        api_test_case t1
+        inner join api_definition a on t1.api_definition_id = a.id
+        <if test="request.protocol != null and request.protocol!=''">
+            and a.protocol = #{request.protocol}
+        </if>
+        <choose>
+            <when test="request.status == 'Trash'">
+                and a.status = 'Trash'
+            </when>
+            <otherwise>
+                and a.status != 'Trash'
+            </otherwise>
+        </choose>
+        <where>
+            <if test="request.combine != null">
+                <include refid="combine">
+                    <property name="condition" value="request.combine"/>
+                    <property name="name" value="request.name"/>
+                    <property name="objectKey" value="request.combine.tags"/>
+                </include>
+            </if>
+            <if test="request.projectId != null and request.projectId!=''">
+                and t1.project_id = #{request.projectId}
+            </if>
+            <if test="request.id != null and request.id!=''">
+                and t1.id = #{request.id}
+            </if>
+            <if test="request.ids != null and request.ids.size() > 0">
+                <if test="request.projectId != null and request.projectId!=''">
+                    and
+                </if>
+                t1.id in
+                <foreach collection="request.ids" item="caseId" separator="," open="(" close=")">
+                    #{caseId}
+                </foreach>
+            </if>
+            <if test="request.name != null and request.name!=''">
+                and (t1.name like CONCAT('%', #{request.name},'%')
+                or t1.tags like CONCAT('%', #{request.name},'%')
+                or t1.num like CONCAT('%', #{request.name},'%'))
+            </if>
+            <if test="request.createTime > 0">
+                and t1.create_time >= #{request.createTime}
+            </if>
+            <if test="request.moduleIds != null and request.moduleIds.size() > 0">
+                and a.module_id in
+                <foreach collection="request.moduleIds" item="nodeId" separator="," open="(" close=")">
+                    #{nodeId}
+                </foreach>
+            </if>
+            <if test="request.filters != null and request.filters.size() > 0">
+                <foreach collection="request.filters.entrySet()" index="key" item="values">
+                    <if test="values != null and values.size() > 0">
+                        <choose>
+                            <when test="key == 'priority'">
+                                and t1.priority in
+                                <foreach collection="values" item="value" separator="," open="(" close=")">
+                                    #{value}
+                                </foreach>
+                            </when>
+                        </choose>
+                    </if>
+                </foreach>
+            </if>
+        </where>
+        <if test="request.orders != null and request.orders.size() > 0">
+            order by
+            <foreach collection="request.orders" separator="," item="order">
+                ${order.name} ${order.type}
+            </foreach>
+        </if>
+    </select>
+    <select id="selectIdsNotExistsInPlan" resultType="java.lang.String">
+        select c.id
+        from api_test_case c
+        where c.project_id = #{projectId}
+          and c.id not in (
+            select pc.api_case_id
+          from test_plan_api_case pc
+          where pc.test_plan_id = #{planId}
+        )
+    </select>
+    <select id="selectIdsNotExistsInReview" resultType="java.lang.String">
+        select c.id
+        from api_test_case c
+        where c.project_id = #{projectId} and c.id not in (
+            select pc.api_case_id
+            from test_case_review_api_case pc
+            where pc.test_case_review_id = #{reviewId}
+        )
+    </select>
+
+    <select id="countProtocolByProjectID" resultType="io.apirun.api.dto.datacount.ApiDataCountResult">
+        SELECT apiDef.protocol AS groupField,COUNT(testCase.id) AS countNumber FROM api_test_case testCase
+        INNER JOIN  api_definition apiDef ON testCase.api_definition_id = apiDef.id
+        WHERE testCase.project_id = #{0} AND apiDef.status != "Trash"
+        GROUP BY apiDef.protocol
+    </select>
+
+    <select id="countByProjectIDAndCreateInThisWeek" resultType="java.lang.Long">
+        SELECT count(testCase.id) AS countNumber FROM api_test_case testCase
+        INNER JOIN  api_definition apiDef ON testCase.api_definition_id = apiDef.id
+        WHERE testCase.project_id = #{projectId}AND apiDef.status != "Trash"
+          AND testCase.create_time BETWEEN #{firstDayTimestamp} AND #{lastDayTimestamp}
+    </select>
+
+    <select id="getRequest" resultType="io.apirun.api.dto.definition.ApiTestCaseInfo">
+        select t1.id, t1.request,a.method AS apiMethod
+        from api_test_case t1
+        inner join api_definition a on t1.api_definition_id = a.id
+        where 1
+        <if test="request.id != null and request.id!=''">
+            and t1.id = #{request.id}
+        </if>
+        <if test="request.ids != null and request.ids.size() > 0">
+            and t1.id in
+            <foreach collection="request.ids" item="caseId" separator="," open="(" close=")">
+                #{caseId}
+            </foreach>
+        </if>
+    </select>
+    <select id="getCaseInfo" resultType="io.apirun.api.dto.definition.ApiTestCaseInfo">
+        select t1.*,a.method AS apiMethod
+        from api_test_case t1
+        inner join api_definition a on t1.api_definition_id = a.id
+        where 1
+        <if test="request.id != null and request.id!=''">
+            and t1.id = #{request.id}
+        </if>
+        <if test="request.ids != null and request.ids.size() > 0">
+            and t1.id in
+            <foreach collection="request.ids" item="caseId" separator="," open="(" close=")">
+                #{caseId}
+            </foreach>
+        </if>
+    </select>
+    <select id="getNextNum" resultType="io.apirun.base.domain.ApiTestCase">
+        SELECT *
+        FROM api_test_case
+        WHERE api_test_case.api_definition_id = #{definitionId}
+        ORDER BY num DESC
+        LIMIT 1;
+    </select>
+    <select id="selectEffectiveTestCaseByProjectId" resultType="io.apirun.base.domain.ApiTestCase">
+        select id,api_definition_id from api_test_case where project_id = #{projectId}
+    </select>
+
+</mapper>

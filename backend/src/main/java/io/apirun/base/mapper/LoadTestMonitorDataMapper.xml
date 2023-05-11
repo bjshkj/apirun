@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.LoadTestMonitorDataMapper">
+  <resultMap id="BaseResultMap" type="io.apirun.base.domain.LoadTestMonitorData">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="report_id" jdbcType="VARCHAR" property="reportId" />
+    <result column="target" jdbcType="VARCHAR" property="target" />
+    <result column="target_type" jdbcType="VARCHAR" property="targetType" />
+    <result column="pointer_type" jdbcType="VARCHAR" property="pointerType" />
+    <result column="number_ical_unit" jdbcType="VARCHAR" property="numberIcalUnit" />
+    <result column="monitor_name" jdbcType="VARCHAR" property="monitorName" />
+    <result column="start_time" jdbcType="BIGINT" property="startTime" />
+    <result column="end_time" jdbcType="BIGINT" property="endTime" />
+    <result column="target_label" jdbcType="VARCHAR" property="targetLabel" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.apirun.base.domain.LoadTestMonitorDataWithBLOBs">
+    <result column="monitor_data" jdbcType="LONGVARCHAR" property="monitorData" />
+    <result column="time_stamp" jdbcType="LONGVARCHAR" property="timeStamp" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, report_id, target, target_type, pointer_type, number_ical_unit, monitor_name, 
+    start_time, end_time, target_label
+  </sql>
+  <sql id="Blob_Column_List">
+    monitor_data, time_stamp
+  </sql>
+  <select id="selectByExampleWithBLOBs" parameterType="io.apirun.base.domain.LoadTestMonitorDataExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from load_test_monitor_data
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="io.apirun.base.domain.LoadTestMonitorDataExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from load_test_monitor_data
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from load_test_monitor_data
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from load_test_monitor_data
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="io.apirun.base.domain.LoadTestMonitorDataExample">
+    delete from load_test_monitor_data
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="io.apirun.base.domain.LoadTestMonitorDataWithBLOBs">
+    insert into load_test_monitor_data (id, report_id, target, 
+      target_type, pointer_type, number_ical_unit, 
+      monitor_name, start_time, end_time, 
+      target_label, monitor_data, time_stamp
+      )
+    values (#{id,jdbcType=BIGINT}, #{reportId,jdbcType=VARCHAR}, #{target,jdbcType=VARCHAR}, 
+      #{targetType,jdbcType=VARCHAR}, #{pointerType,jdbcType=VARCHAR}, #{numberIcalUnit,jdbcType=VARCHAR}, 
+      #{monitorName,jdbcType=VARCHAR}, #{startTime,jdbcType=BIGINT}, #{endTime,jdbcType=BIGINT}, 
+      #{targetLabel,jdbcType=VARCHAR}, #{monitorData,jdbcType=LONGVARCHAR}, #{timeStamp,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="io.apirun.base.domain.LoadTestMonitorDataWithBLOBs">
+    insert into load_test_monitor_data
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="reportId != null">
+        report_id,
+      </if>
+      <if test="target != null">
+        target,
+      </if>
+      <if test="targetType != null">
+        target_type,
+      </if>
+      <if test="pointerType != null">
+        pointer_type,
+      </if>
+      <if test="numberIcalUnit != null">
+        number_ical_unit,
+      </if>
+      <if test="monitorName != null">
+        monitor_name,
+      </if>
+      <if test="startTime != null">
+        start_time,
+      </if>
+      <if test="endTime != null">
+        end_time,
+      </if>
+      <if test="targetLabel != null">
+        target_label,
+      </if>
+      <if test="monitorData != null">
+        monitor_data,
+      </if>
+      <if test="timeStamp != null">
+        time_stamp,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="reportId != null">
+        #{reportId,jdbcType=VARCHAR},
+      </if>
+      <if test="target != null">
+        #{target,jdbcType=VARCHAR},
+      </if>
+      <if test="targetType != null">
+        #{targetType,jdbcType=VARCHAR},
+      </if>
+      <if test="pointerType != null">
+        #{pointerType,jdbcType=VARCHAR},
+      </if>
+      <if test="numberIcalUnit != null">
+        #{numberIcalUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="monitorName != null">
+        #{monitorName,jdbcType=VARCHAR},
+      </if>
+      <if test="startTime != null">
+        #{startTime,jdbcType=BIGINT},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=BIGINT},
+      </if>
+      <if test="targetLabel != null">
+        #{targetLabel,jdbcType=VARCHAR},
+      </if>
+      <if test="monitorData != null">
+        #{monitorData,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="timeStamp != null">
+        #{timeStamp,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="io.apirun.base.domain.LoadTestMonitorDataExample" resultType="java.lang.Long">
+    select count(*) from load_test_monitor_data
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update load_test_monitor_data
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.reportId != null">
+        report_id = #{record.reportId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.target != null">
+        target = #{record.target,jdbcType=VARCHAR},
+      </if>
+      <if test="record.targetType != null">
+        target_type = #{record.targetType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.pointerType != null">
+        pointer_type = #{record.pointerType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.numberIcalUnit != null">
+        number_ical_unit = #{record.numberIcalUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="record.monitorName != null">
+        monitor_name = #{record.monitorName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.startTime != null">
+        start_time = #{record.startTime,jdbcType=BIGINT},
+      </if>
+      <if test="record.endTime != null">
+        end_time = #{record.endTime,jdbcType=BIGINT},
+      </if>
+      <if test="record.targetLabel != null">
+        target_label = #{record.targetLabel,jdbcType=VARCHAR},
+      </if>
+      <if test="record.monitorData != null">
+        monitor_data = #{record.monitorData,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.timeStamp != null">
+        time_stamp = #{record.timeStamp,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    update load_test_monitor_data
+    set id = #{record.id,jdbcType=BIGINT},
+      report_id = #{record.reportId,jdbcType=VARCHAR},
+      target = #{record.target,jdbcType=VARCHAR},
+      target_type = #{record.targetType,jdbcType=VARCHAR},
+      pointer_type = #{record.pointerType,jdbcType=VARCHAR},
+      number_ical_unit = #{record.numberIcalUnit,jdbcType=VARCHAR},
+      monitor_name = #{record.monitorName,jdbcType=VARCHAR},
+      start_time = #{record.startTime,jdbcType=BIGINT},
+      end_time = #{record.endTime,jdbcType=BIGINT},
+      target_label = #{record.targetLabel,jdbcType=VARCHAR},
+      monitor_data = #{record.monitorData,jdbcType=LONGVARCHAR},
+      time_stamp = #{record.timeStamp,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update load_test_monitor_data
+    set id = #{record.id,jdbcType=BIGINT},
+      report_id = #{record.reportId,jdbcType=VARCHAR},
+      target = #{record.target,jdbcType=VARCHAR},
+      target_type = #{record.targetType,jdbcType=VARCHAR},
+      pointer_type = #{record.pointerType,jdbcType=VARCHAR},
+      number_ical_unit = #{record.numberIcalUnit,jdbcType=VARCHAR},
+      monitor_name = #{record.monitorName,jdbcType=VARCHAR},
+      start_time = #{record.startTime,jdbcType=BIGINT},
+      end_time = #{record.endTime,jdbcType=BIGINT},
+      target_label = #{record.targetLabel,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="io.apirun.base.domain.LoadTestMonitorDataWithBLOBs">
+    update load_test_monitor_data
+    <set>
+      <if test="reportId != null">
+        report_id = #{reportId,jdbcType=VARCHAR},
+      </if>
+      <if test="target != null">
+        target = #{target,jdbcType=VARCHAR},
+      </if>
+      <if test="targetType != null">
+        target_type = #{targetType,jdbcType=VARCHAR},
+      </if>
+      <if test="pointerType != null">
+        pointer_type = #{pointerType,jdbcType=VARCHAR},
+      </if>
+      <if test="numberIcalUnit != null">
+        number_ical_unit = #{numberIcalUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="monitorName != null">
+        monitor_name = #{monitorName,jdbcType=VARCHAR},
+      </if>
+      <if test="startTime != null">
+        start_time = #{startTime,jdbcType=BIGINT},
+      </if>
+      <if test="endTime != null">
+        end_time = #{endTime,jdbcType=BIGINT},
+      </if>
+      <if test="targetLabel != null">
+        target_label = #{targetLabel,jdbcType=VARCHAR},
+      </if>
+      <if test="monitorData != null">
+        monitor_data = #{monitorData,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="timeStamp != null">
+        time_stamp = #{timeStamp,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.apirun.base.domain.LoadTestMonitorDataWithBLOBs">
+    update load_test_monitor_data
+    set
+      number_ical_unit = #{numberIcalUnit,jdbcType=VARCHAR},
+      monitor_name = #{monitorName,jdbcType=VARCHAR},
+      start_time = #{startTime,jdbcType=BIGINT},
+      end_time = #{endTime,jdbcType=BIGINT},
+      monitor_data = #{monitorData,jdbcType=LONGVARCHAR},
+      time_stamp = #{timeStamp,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.apirun.base.domain.LoadTestMonitorData">
+    update load_test_monitor_data
+    set report_id = #{reportId,jdbcType=VARCHAR},
+      target = #{target,jdbcType=VARCHAR},
+      target_type = #{targetType,jdbcType=VARCHAR},
+      pointer_type = #{pointerType,jdbcType=VARCHAR},
+      number_ical_unit = #{numberIcalUnit,jdbcType=VARCHAR},
+      monitor_name = #{monitorName,jdbcType=VARCHAR},
+      start_time = #{startTime,jdbcType=BIGINT},
+      end_time = #{endTime,jdbcType=BIGINT},
+      target_label = #{targetLabel,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

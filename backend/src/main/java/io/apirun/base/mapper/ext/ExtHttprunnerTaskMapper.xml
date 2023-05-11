@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.ext.ExtHttprunnerTaskMapper">
+  <resultMap id="BaseResultMap" type="io.apirun.base.domain.HttprunnerTask">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="task_name" jdbcType="VARCHAR" property="taskName" />
+    <result column="project_id" jdbcType="VARCHAR" property="projectId" />
+    <result column="git_version" jdbcType="VARCHAR" property="gitVersion" />
+    <result column="debug_mode" jdbcType="VARCHAR" property="debugMode" />
+    <result column="git_ver_desc" jdbcType="VARCHAR" property="gitVerDesc" />
+    <result column="exec_case_paths" jdbcType="VARCHAR" property="execCasePaths" />
+    <result column="dot_env_path" jdbcType="VARCHAR" property="dotEnvPath" />
+    <result column="hosts_path" jdbcType="VARCHAR" property="hostsPath" />
+    <result column="trigger_model" jdbcType="VARCHAR" property="triggerModel" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="task_status" jdbcType="VARCHAR" property="taskStatus" />
+    <result column="ctime" jdbcType="BIGINT" property="ctime" />
+    <result column="utime" jdbcType="BIGINT" property="utime" />
+    <result column="node_id" jdbcType="VARCHAR" property="nodeId" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="stime" jdbcType="BIGINT" property="stime" />
+    <result column="ftime" jdbcType="BIGINT" property="ftime" />
+    <result column="tcases_total" jdbcType="INTEGER" property="tcasesTotal" />
+    <result column="tcases_success" jdbcType="INTEGER" property="tcasesSuccess" />
+    <result column="tcases_fail" jdbcType="INTEGER" property="tcasesFail" />
+    <result column="tsteps_total" jdbcType="INTEGER" property="tstepsTotal" />
+    <result column="tsteps_failures" jdbcType="INTEGER" property="tstepsFailures" />
+    <result column="tsteps_errors" jdbcType="INTEGER" property="tstepsErrors" />
+    <result column="tsteps_skipped" jdbcType="INTEGER" property="tstepsSkipped" />
+    <result column="tsteps_expected_failures" jdbcType="INTEGER" property="tstepsExpectedFailures" />
+    <result column="tsteps_unexpected_successes" jdbcType="INTEGER" property="tstepsUnexpectedSuccesses" />
+    <result column="tsteps_successes" jdbcType="INTEGER" property="tstepsSuccesses" />
+    <result column="duration" jdbcType="DOUBLE" property="duration" />
+    <result column="test_log_id" jdbcType="VARCHAR" property="testLogId" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.apirun.base.domain.HttprunnerTask">
+    <result column="platform" jdbcType="LONGVARCHAR" property="platform" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, task_name, project_id, git_version, debug_mode, git_ver_desc, exec_case_paths,
+    dot_env_path, hosts_path, trigger_model, create_user, task_status, ctime, utime,
+    node_id, image, stime, ftime, tcases_total, tcases_success, tcases_fail, tsteps_total,
+    tsteps_failures, tsteps_errors, tsteps_skipped, tsteps_expected_failures, tsteps_unexpected_successes,
+    tsteps_successes, duration, test_log_id
+  </sql>
+  <sql id="Blob_Column_List">
+    platform
+  </sql>
+  <select id="getTaskListByProjectId" resultType="io.apirun.base.domain.HttprunnerTask">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from httprunner_task
+    where project_id = #{projectId}
+    order by ctime desc
+
+  </select>
+
+  <select id="getNeedExecuteTask" resultType="io.apirun.base.domain.HttprunnerTask">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from httprunner_task
+    where task_status in
+    <foreach collection="taskStatus" item="v" separator="," open="(" close=")">
+      #{v}
+    </foreach>
+
+  </select>
+
+  <update id="updateTaskStatus" parameterType="io.apirun.base.domain.HttprunnerTask">
+    update httprunner_task
+    set
+      task_status = #{taskStatus,jdbcType=VARCHAR},
+      utime = #{utime,jdbcType=BIGINT}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <select id="getTaskByNodeIdAndTaskStatus" resultType="io.apirun.base.domain.HttprunnerTask">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from httprunner_task
+    where
+    task_status = #{status}
+    and
+    node_id = #{nodeId}
+
+  </select>
+
+  <select id="getExecutingTaskCountByNodeId" resultType="java.lang.Integer">
+    select
+       count(*)
+    from httprunner_task
+    where
+    task_status = #{status}
+    and
+    node_id = #{nodeId}
+ </select>
+
+  <delete id="deleteByPrimaryKey">
+    delete
+    from httprunner_task
+    where id = #{id}
+  </delete>
+</mapper>

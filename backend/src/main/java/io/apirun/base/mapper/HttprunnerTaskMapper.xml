@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.HttprunnerTaskMapper">
+  <resultMap id="BaseResultMap" type="io.apirun.base.domain.HttprunnerTask">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="task_name" jdbcType="VARCHAR" property="taskName" />
+    <result column="project_id" jdbcType="VARCHAR" property="projectId" />
+    <result column="git_version" jdbcType="VARCHAR" property="gitVersion" />
+    <result column="debug_mode" jdbcType="VARCHAR" property="debugMode" />
+    <result column="git_ver_desc" jdbcType="VARCHAR" property="gitVerDesc" />
+    <result column="exec_case_paths" jdbcType="VARCHAR" property="execCasePaths" />
+    <result column="dot_env_path" jdbcType="VARCHAR" property="dotEnvPath" />
+    <result column="hosts_path" jdbcType="VARCHAR" property="hostsPath" />
+    <result column="trigger_model" jdbcType="VARCHAR" property="triggerModel" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="task_status" jdbcType="VARCHAR" property="taskStatus" />
+    <result column="ctime" jdbcType="BIGINT" property="ctime" />
+    <result column="utime" jdbcType="BIGINT" property="utime" />
+    <result column="node_id" jdbcType="VARCHAR" property="nodeId" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="stime" jdbcType="BIGINT" property="stime" />
+    <result column="ftime" jdbcType="BIGINT" property="ftime" />
+    <result column="tcases_total" jdbcType="INTEGER" property="tcasesTotal" />
+    <result column="tcases_success" jdbcType="INTEGER" property="tcasesSuccess" />
+    <result column="tcases_fail" jdbcType="INTEGER" property="tcasesFail" />
+    <result column="tsteps_total" jdbcType="INTEGER" property="tstepsTotal" />
+    <result column="tsteps_failures" jdbcType="INTEGER" property="tstepsFailures" />
+    <result column="tsteps_errors" jdbcType="INTEGER" property="tstepsErrors" />
+    <result column="tsteps_skipped" jdbcType="INTEGER" property="tstepsSkipped" />
+    <result column="tsteps_expected_failures" jdbcType="INTEGER" property="tstepsExpectedFailures" />
+    <result column="tsteps_unexpected_successes" jdbcType="INTEGER" property="tstepsUnexpectedSuccesses" />
+    <result column="tsteps_successes" jdbcType="INTEGER" property="tstepsSuccesses" />
+    <result column="duration" jdbcType="DOUBLE" property="duration" />
+    <result column="test_log_id" jdbcType="VARCHAR" property="testLogId" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.apirun.base.domain.HttprunnerTask">
+    <result column="platform" jdbcType="LONGVARCHAR" property="platform" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, task_name, project_id, git_version, debug_mode, git_ver_desc, exec_case_paths, 
+    dot_env_path, hosts_path, trigger_model, create_user, task_status, ctime, utime, 
+    node_id, image, stime, ftime, tcases_total, tcases_success, tcases_fail, tsteps_total, 
+    tsteps_failures, tsteps_errors, tsteps_skipped, tsteps_expected_failures, tsteps_unexpected_successes, 
+    tsteps_successes, duration, test_log_id
+  </sql>
+  <sql id="Blob_Column_List">
+    platform
+  </sql>
+  <select id="selectByExampleWithBLOBs" parameterType="io.apirun.base.domain.HttprunnerTaskExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from httprunner_task
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="io.apirun.base.domain.HttprunnerTaskExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from httprunner_task
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from httprunner_task
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from httprunner_task
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="io.apirun.base.domain.HttprunnerTaskExample">
+    delete from httprunner_task
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="io.apirun.base.domain.HttprunnerTask">
+    insert into httprunner_task (id, task_name, project_id, 
+      git_version, debug_mode, git_ver_desc, 
+      exec_case_paths, dot_env_path, hosts_path, 
+      trigger_model, create_user, task_status, 
+      ctime, utime, node_id, 
+      image, stime, ftime, 
+      tcases_total, tcases_success, tcases_fail, 
+      tsteps_total, tsteps_failures, tsteps_errors, 
+      tsteps_skipped, tsteps_expected_failures, 
+      tsteps_unexpected_successes, tsteps_successes, 
+      duration, test_log_id, platform
+      )
+    values (#{id,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR}, #{projectId,jdbcType=VARCHAR}, 
+      #{gitVersion,jdbcType=VARCHAR}, #{debugMode,jdbcType=VARCHAR}, #{gitVerDesc,jdbcType=VARCHAR}, 
+      #{execCasePaths,jdbcType=VARCHAR}, #{dotEnvPath,jdbcType=VARCHAR}, #{hostsPath,jdbcType=VARCHAR}, 
+      #{triggerModel,jdbcType=VARCHAR}, #{createUser,jdbcType=VARCHAR}, #{taskStatus,jdbcType=VARCHAR}, 
+      #{ctime,jdbcType=BIGINT}, #{utime,jdbcType=BIGINT}, #{nodeId,jdbcType=VARCHAR}, 
+      #{image,jdbcType=VARCHAR}, #{stime,jdbcType=BIGINT}, #{ftime,jdbcType=BIGINT}, 
+      #{tcasesTotal,jdbcType=INTEGER}, #{tcasesSuccess,jdbcType=INTEGER}, #{tcasesFail,jdbcType=INTEGER}, 
+      #{tstepsTotal,jdbcType=INTEGER}, #{tstepsFailures,jdbcType=INTEGER}, #{tstepsErrors,jdbcType=INTEGER}, 
+      #{tstepsSkipped,jdbcType=INTEGER}, #{tstepsExpectedFailures,jdbcType=INTEGER}, 
+      #{tstepsUnexpectedSuccesses,jdbcType=INTEGER}, #{tstepsSuccesses,jdbcType=INTEGER}, 
+      #{duration,jdbcType=DOUBLE}, #{testLogId,jdbcType=VARCHAR}, #{platform,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="io.apirun.base.domain.HttprunnerTask">
+    insert into httprunner_task
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="taskName != null">
+        task_name,
+      </if>
+      <if test="projectId != null">
+        project_id,
+      </if>
+      <if test="gitVersion != null">
+        git_version,
+      </if>
+      <if test="debugMode != null">
+        debug_mode,
+      </if>
+      <if test="gitVerDesc != null">
+        git_ver_desc,
+      </if>
+      <if test="execCasePaths != null">
+        exec_case_paths,
+      </if>
+      <if test="dotEnvPath != null">
+        dot_env_path,
+      </if>
+      <if test="hostsPath != null">
+        hosts_path,
+      </if>
+      <if test="triggerModel != null">
+        trigger_model,
+      </if>
+      <if test="createUser != null">
+        create_user,
+      </if>
+      <if test="taskStatus != null">
+        task_status,
+      </if>
+      <if test="ctime != null">
+        ctime,
+      </if>
+      <if test="utime != null">
+        utime,
+      </if>
+      <if test="nodeId != null">
+        node_id,
+      </if>
+      <if test="image != null">
+        image,
+      </if>
+      <if test="stime != null">
+        stime,
+      </if>
+      <if test="ftime != null">
+        ftime,
+      </if>
+      <if test="tcasesTotal != null">
+        tcases_total,
+      </if>
+      <if test="tcasesSuccess != null">
+        tcases_success,
+      </if>
+      <if test="tcasesFail != null">
+        tcases_fail,
+      </if>
+      <if test="tstepsTotal != null">
+        tsteps_total,
+      </if>
+      <if test="tstepsFailures != null">
+        tsteps_failures,
+      </if>
+      <if test="tstepsErrors != null">
+        tsteps_errors,
+      </if>
+      <if test="tstepsSkipped != null">
+        tsteps_skipped,
+      </if>
+      <if test="tstepsExpectedFailures != null">
+        tsteps_expected_failures,
+      </if>
+      <if test="tstepsUnexpectedSuccesses != null">
+        tsteps_unexpected_successes,
+      </if>
+      <if test="tstepsSuccesses != null">
+        tsteps_successes,
+      </if>
+      <if test="duration != null">
+        duration,
+      </if>
+      <if test="testLogId != null">
+        test_log_id,
+      </if>
+      <if test="platform != null">
+        platform,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="taskName != null">
+        #{taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="projectId != null">
+        #{projectId,jdbcType=VARCHAR},
+      </if>
+      <if test="gitVersion != null">
+        #{gitVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="debugMode != null">
+        #{debugMode,jdbcType=VARCHAR},
+      </if>
+      <if test="gitVerDesc != null">
+        #{gitVerDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="execCasePaths != null">
+        #{execCasePaths,jdbcType=VARCHAR},
+      </if>
+      <if test="dotEnvPath != null">
+        #{dotEnvPath,jdbcType=VARCHAR},
+      </if>
+      <if test="hostsPath != null">
+        #{hostsPath,jdbcType=VARCHAR},
+      </if>
+      <if test="triggerModel != null">
+        #{triggerModel,jdbcType=VARCHAR},
+      </if>
+      <if test="createUser != null">
+        #{createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="taskStatus != null">
+        #{taskStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null">
+        #{ctime,jdbcType=BIGINT},
+      </if>
+      <if test="utime != null">
+        #{utime,jdbcType=BIGINT},
+      </if>
+      <if test="nodeId != null">
+        #{nodeId,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null">
+        #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="stime != null">
+        #{stime,jdbcType=BIGINT},
+      </if>
+      <if test="ftime != null">
+        #{ftime,jdbcType=BIGINT},
+      </if>
+      <if test="tcasesTotal != null">
+        #{tcasesTotal,jdbcType=INTEGER},
+      </if>
+      <if test="tcasesSuccess != null">
+        #{tcasesSuccess,jdbcType=INTEGER},
+      </if>
+      <if test="tcasesFail != null">
+        #{tcasesFail,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsTotal != null">
+        #{tstepsTotal,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsFailures != null">
+        #{tstepsFailures,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsErrors != null">
+        #{tstepsErrors,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsSkipped != null">
+        #{tstepsSkipped,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsExpectedFailures != null">
+        #{tstepsExpectedFailures,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsUnexpectedSuccesses != null">
+        #{tstepsUnexpectedSuccesses,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsSuccesses != null">
+        #{tstepsSuccesses,jdbcType=INTEGER},
+      </if>
+      <if test="duration != null">
+        #{duration,jdbcType=DOUBLE},
+      </if>
+      <if test="testLogId != null">
+        #{testLogId,jdbcType=VARCHAR},
+      </if>
+      <if test="platform != null">
+        #{platform,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="io.apirun.base.domain.HttprunnerTaskExample" resultType="java.lang.Long">
+    select count(*) from httprunner_task
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update httprunner_task
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.taskName != null">
+        task_name = #{record.taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.projectId != null">
+        project_id = #{record.projectId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.gitVersion != null">
+        git_version = #{record.gitVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.debugMode != null">
+        debug_mode = #{record.debugMode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.gitVerDesc != null">
+        git_ver_desc = #{record.gitVerDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="record.execCasePaths != null">
+        exec_case_paths = #{record.execCasePaths,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dotEnvPath != null">
+        dot_env_path = #{record.dotEnvPath,jdbcType=VARCHAR},
+      </if>
+      <if test="record.hostsPath != null">
+        hosts_path = #{record.hostsPath,jdbcType=VARCHAR},
+      </if>
+      <if test="record.triggerModel != null">
+        trigger_model = #{record.triggerModel,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createUser != null">
+        create_user = #{record.createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="record.taskStatus != null">
+        task_status = #{record.taskStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="record.ctime != null">
+        ctime = #{record.ctime,jdbcType=BIGINT},
+      </if>
+      <if test="record.utime != null">
+        utime = #{record.utime,jdbcType=BIGINT},
+      </if>
+      <if test="record.nodeId != null">
+        node_id = #{record.nodeId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image != null">
+        image = #{record.image,jdbcType=VARCHAR},
+      </if>
+      <if test="record.stime != null">
+        stime = #{record.stime,jdbcType=BIGINT},
+      </if>
+      <if test="record.ftime != null">
+        ftime = #{record.ftime,jdbcType=BIGINT},
+      </if>
+      <if test="record.tcasesTotal != null">
+        tcases_total = #{record.tcasesTotal,jdbcType=INTEGER},
+      </if>
+      <if test="record.tcasesSuccess != null">
+        tcases_success = #{record.tcasesSuccess,jdbcType=INTEGER},
+      </if>
+      <if test="record.tcasesFail != null">
+        tcases_fail = #{record.tcasesFail,jdbcType=INTEGER},
+      </if>
+      <if test="record.tstepsTotal != null">
+        tsteps_total = #{record.tstepsTotal,jdbcType=INTEGER},
+      </if>
+      <if test="record.tstepsFailures != null">
+        tsteps_failures = #{record.tstepsFailures,jdbcType=INTEGER},
+      </if>
+      <if test="record.tstepsErrors != null">
+        tsteps_errors = #{record.tstepsErrors,jdbcType=INTEGER},
+      </if>
+      <if test="record.tstepsSkipped != null">
+        tsteps_skipped = #{record.tstepsSkipped,jdbcType=INTEGER},
+      </if>
+      <if test="record.tstepsExpectedFailures != null">
+        tsteps_expected_failures = #{record.tstepsExpectedFailures,jdbcType=INTEGER},
+      </if>
+      <if test="record.tstepsUnexpectedSuccesses != null">
+        tsteps_unexpected_successes = #{record.tstepsUnexpectedSuccesses,jdbcType=INTEGER},
+      </if>
+      <if test="record.tstepsSuccesses != null">
+        tsteps_successes = #{record.tstepsSuccesses,jdbcType=INTEGER},
+      </if>
+      <if test="record.duration != null">
+        duration = #{record.duration,jdbcType=DOUBLE},
+      </if>
+      <if test="record.testLogId != null">
+        test_log_id = #{record.testLogId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.platform != null">
+        platform = #{record.platform,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    update httprunner_task
+    set id = #{record.id,jdbcType=VARCHAR},
+      task_name = #{record.taskName,jdbcType=VARCHAR},
+      project_id = #{record.projectId,jdbcType=VARCHAR},
+      git_version = #{record.gitVersion,jdbcType=VARCHAR},
+      debug_mode = #{record.debugMode,jdbcType=VARCHAR},
+      git_ver_desc = #{record.gitVerDesc,jdbcType=VARCHAR},
+      exec_case_paths = #{record.execCasePaths,jdbcType=VARCHAR},
+      dot_env_path = #{record.dotEnvPath,jdbcType=VARCHAR},
+      hosts_path = #{record.hostsPath,jdbcType=VARCHAR},
+      trigger_model = #{record.triggerModel,jdbcType=VARCHAR},
+      create_user = #{record.createUser,jdbcType=VARCHAR},
+      task_status = #{record.taskStatus,jdbcType=VARCHAR},
+      ctime = #{record.ctime,jdbcType=BIGINT},
+      utime = #{record.utime,jdbcType=BIGINT},
+      node_id = #{record.nodeId,jdbcType=VARCHAR},
+      image = #{record.image,jdbcType=VARCHAR},
+      stime = #{record.stime,jdbcType=BIGINT},
+      ftime = #{record.ftime,jdbcType=BIGINT},
+      tcases_total = #{record.tcasesTotal,jdbcType=INTEGER},
+      tcases_success = #{record.tcasesSuccess,jdbcType=INTEGER},
+      tcases_fail = #{record.tcasesFail,jdbcType=INTEGER},
+      tsteps_total = #{record.tstepsTotal,jdbcType=INTEGER},
+      tsteps_failures = #{record.tstepsFailures,jdbcType=INTEGER},
+      tsteps_errors = #{record.tstepsErrors,jdbcType=INTEGER},
+      tsteps_skipped = #{record.tstepsSkipped,jdbcType=INTEGER},
+      tsteps_expected_failures = #{record.tstepsExpectedFailures,jdbcType=INTEGER},
+      tsteps_unexpected_successes = #{record.tstepsUnexpectedSuccesses,jdbcType=INTEGER},
+      tsteps_successes = #{record.tstepsSuccesses,jdbcType=INTEGER},
+      duration = #{record.duration,jdbcType=DOUBLE},
+      test_log_id = #{record.testLogId,jdbcType=VARCHAR},
+      platform = #{record.platform,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update httprunner_task
+    set id = #{record.id,jdbcType=VARCHAR},
+      task_name = #{record.taskName,jdbcType=VARCHAR},
+      project_id = #{record.projectId,jdbcType=VARCHAR},
+      git_version = #{record.gitVersion,jdbcType=VARCHAR},
+      debug_mode = #{record.debugMode,jdbcType=VARCHAR},
+      git_ver_desc = #{record.gitVerDesc,jdbcType=VARCHAR},
+      exec_case_paths = #{record.execCasePaths,jdbcType=VARCHAR},
+      dot_env_path = #{record.dotEnvPath,jdbcType=VARCHAR},
+      hosts_path = #{record.hostsPath,jdbcType=VARCHAR},
+      trigger_model = #{record.triggerModel,jdbcType=VARCHAR},
+      create_user = #{record.createUser,jdbcType=VARCHAR},
+      task_status = #{record.taskStatus,jdbcType=VARCHAR},
+      ctime = #{record.ctime,jdbcType=BIGINT},
+      utime = #{record.utime,jdbcType=BIGINT},
+      node_id = #{record.nodeId,jdbcType=VARCHAR},
+      image = #{record.image,jdbcType=VARCHAR},
+      stime = #{record.stime,jdbcType=BIGINT},
+      ftime = #{record.ftime,jdbcType=BIGINT},
+      tcases_total = #{record.tcasesTotal,jdbcType=INTEGER},
+      tcases_success = #{record.tcasesSuccess,jdbcType=INTEGER},
+      tcases_fail = #{record.tcasesFail,jdbcType=INTEGER},
+      tsteps_total = #{record.tstepsTotal,jdbcType=INTEGER},
+      tsteps_failures = #{record.tstepsFailures,jdbcType=INTEGER},
+      tsteps_errors = #{record.tstepsErrors,jdbcType=INTEGER},
+      tsteps_skipped = #{record.tstepsSkipped,jdbcType=INTEGER},
+      tsteps_expected_failures = #{record.tstepsExpectedFailures,jdbcType=INTEGER},
+      tsteps_unexpected_successes = #{record.tstepsUnexpectedSuccesses,jdbcType=INTEGER},
+      tsteps_successes = #{record.tstepsSuccesses,jdbcType=INTEGER},
+      duration = #{record.duration,jdbcType=DOUBLE},
+      test_log_id = #{record.testLogId,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="io.apirun.base.domain.HttprunnerTask">
+    update httprunner_task
+    <set>
+      <if test="taskName != null">
+        task_name = #{taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="projectId != null">
+        project_id = #{projectId,jdbcType=VARCHAR},
+      </if>
+      <if test="gitVersion != null">
+        git_version = #{gitVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="debugMode != null">
+        debug_mode = #{debugMode,jdbcType=VARCHAR},
+      </if>
+      <if test="gitVerDesc != null">
+        git_ver_desc = #{gitVerDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="execCasePaths != null">
+        exec_case_paths = #{execCasePaths,jdbcType=VARCHAR},
+      </if>
+      <if test="dotEnvPath != null">
+        dot_env_path = #{dotEnvPath,jdbcType=VARCHAR},
+      </if>
+      <if test="hostsPath != null">
+        hosts_path = #{hostsPath,jdbcType=VARCHAR},
+      </if>
+      <if test="triggerModel != null">
+        trigger_model = #{triggerModel,jdbcType=VARCHAR},
+      </if>
+      <if test="createUser != null">
+        create_user = #{createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="taskStatus != null">
+        task_status = #{taskStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null">
+        ctime = #{ctime,jdbcType=BIGINT},
+      </if>
+      <if test="utime != null">
+        utime = #{utime,jdbcType=BIGINT},
+      </if>
+      <if test="nodeId != null">
+        node_id = #{nodeId,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null">
+        image = #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="stime != null">
+        stime = #{stime,jdbcType=BIGINT},
+      </if>
+      <if test="ftime != null">
+        ftime = #{ftime,jdbcType=BIGINT},
+      </if>
+      <if test="tcasesTotal != null">
+        tcases_total = #{tcasesTotal,jdbcType=INTEGER},
+      </if>
+      <if test="tcasesSuccess != null">
+        tcases_success = #{tcasesSuccess,jdbcType=INTEGER},
+      </if>
+      <if test="tcasesFail != null">
+        tcases_fail = #{tcasesFail,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsTotal != null">
+        tsteps_total = #{tstepsTotal,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsFailures != null">
+        tsteps_failures = #{tstepsFailures,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsErrors != null">
+        tsteps_errors = #{tstepsErrors,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsSkipped != null">
+        tsteps_skipped = #{tstepsSkipped,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsExpectedFailures != null">
+        tsteps_expected_failures = #{tstepsExpectedFailures,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsUnexpectedSuccesses != null">
+        tsteps_unexpected_successes = #{tstepsUnexpectedSuccesses,jdbcType=INTEGER},
+      </if>
+      <if test="tstepsSuccesses != null">
+        tsteps_successes = #{tstepsSuccesses,jdbcType=INTEGER},
+      </if>
+      <if test="duration != null">
+        duration = #{duration,jdbcType=DOUBLE},
+      </if>
+      <if test="testLogId != null">
+        test_log_id = #{testLogId,jdbcType=VARCHAR},
+      </if>
+      <if test="platform != null">
+        platform = #{platform,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.apirun.base.domain.HttprunnerTask">
+    update httprunner_task
+    set task_name = #{taskName,jdbcType=VARCHAR},
+      project_id = #{projectId,jdbcType=VARCHAR},
+      git_version = #{gitVersion,jdbcType=VARCHAR},
+      debug_mode = #{debugMode,jdbcType=VARCHAR},
+      git_ver_desc = #{gitVerDesc,jdbcType=VARCHAR},
+      exec_case_paths = #{execCasePaths,jdbcType=VARCHAR},
+      dot_env_path = #{dotEnvPath,jdbcType=VARCHAR},
+      hosts_path = #{hostsPath,jdbcType=VARCHAR},
+      trigger_model = #{triggerModel,jdbcType=VARCHAR},
+      create_user = #{createUser,jdbcType=VARCHAR},
+      task_status = #{taskStatus,jdbcType=VARCHAR},
+      ctime = #{ctime,jdbcType=BIGINT},
+      utime = #{utime,jdbcType=BIGINT},
+      node_id = #{nodeId,jdbcType=VARCHAR},
+      image = #{image,jdbcType=VARCHAR},
+      stime = #{stime,jdbcType=BIGINT},
+      ftime = #{ftime,jdbcType=BIGINT},
+      tcases_total = #{tcasesTotal,jdbcType=INTEGER},
+      tcases_success = #{tcasesSuccess,jdbcType=INTEGER},
+      tcases_fail = #{tcasesFail,jdbcType=INTEGER},
+      tsteps_total = #{tstepsTotal,jdbcType=INTEGER},
+      tsteps_failures = #{tstepsFailures,jdbcType=INTEGER},
+      tsteps_errors = #{tstepsErrors,jdbcType=INTEGER},
+      tsteps_skipped = #{tstepsSkipped,jdbcType=INTEGER},
+      tsteps_expected_failures = #{tstepsExpectedFailures,jdbcType=INTEGER},
+      tsteps_unexpected_successes = #{tstepsUnexpectedSuccesses,jdbcType=INTEGER},
+      tsteps_successes = #{tstepsSuccesses,jdbcType=INTEGER},
+      duration = #{duration,jdbcType=DOUBLE},
+      test_log_id = #{testLogId,jdbcType=VARCHAR},
+      platform = #{platform,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.apirun.base.domain.HttprunnerTask">
+    update httprunner_task
+    set task_name = #{taskName,jdbcType=VARCHAR},
+      project_id = #{projectId,jdbcType=VARCHAR},
+      git_version = #{gitVersion,jdbcType=VARCHAR},
+      debug_mode = #{debugMode,jdbcType=VARCHAR},
+      git_ver_desc = #{gitVerDesc,jdbcType=VARCHAR},
+      exec_case_paths = #{execCasePaths,jdbcType=VARCHAR},
+      dot_env_path = #{dotEnvPath,jdbcType=VARCHAR},
+      hosts_path = #{hostsPath,jdbcType=VARCHAR},
+      trigger_model = #{triggerModel,jdbcType=VARCHAR},
+      create_user = #{createUser,jdbcType=VARCHAR},
+      task_status = #{taskStatus,jdbcType=VARCHAR},
+      ctime = #{ctime,jdbcType=BIGINT},
+      utime = #{utime,jdbcType=BIGINT},
+      node_id = #{nodeId,jdbcType=VARCHAR},
+      image = #{image,jdbcType=VARCHAR},
+      stime = #{stime,jdbcType=BIGINT},
+      ftime = #{ftime,jdbcType=BIGINT},
+      tcases_total = #{tcasesTotal,jdbcType=INTEGER},
+      tcases_success = #{tcasesSuccess,jdbcType=INTEGER},
+      tcases_fail = #{tcasesFail,jdbcType=INTEGER},
+      tsteps_total = #{tstepsTotal,jdbcType=INTEGER},
+      tsteps_failures = #{tstepsFailures,jdbcType=INTEGER},
+      tsteps_errors = #{tstepsErrors,jdbcType=INTEGER},
+      tsteps_skipped = #{tstepsSkipped,jdbcType=INTEGER},
+      tsteps_expected_failures = #{tstepsExpectedFailures,jdbcType=INTEGER},
+      tsteps_unexpected_successes = #{tstepsUnexpectedSuccesses,jdbcType=INTEGER},
+      tsteps_successes = #{tstepsSuccesses,jdbcType=INTEGER},
+      duration = #{duration,jdbcType=DOUBLE},
+      test_log_id = #{testLogId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

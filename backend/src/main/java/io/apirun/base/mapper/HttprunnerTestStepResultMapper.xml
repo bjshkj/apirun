@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.apirun.base.mapper.HttprunnerTestStepResultMapper">
+    <resultMap id="BaseResultMap" type="io.apirun.base.domain.TestStepResult">
+        <id column="task_id" jdbcType="VARCHAR" property="taskId" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="idx" jdbcType="TINYINT" property="index" />
+        <result column="testcase_id" jdbcType="TINYINT" property="testCaseId" />
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="duration" jdbcType="DOUBLE" property="duration" />
+        <result column="method" jdbcType="CHAR" property="method" />
+        <result column="status" jdbcType="CHAR" property="status" />
+        <result property="attachment" column="attachment" jdbcType="LONGVARCHAR"/>
+        <result property="validateExtractor" column="validate_extractor" jdbcType="LONGVARCHAR" />
+        <result property="requestInfo.url" column="req_url" jdbcType="VARCHAR"/>
+        <result property="requestInfo.headers" column="req_headers" jdbcType="LONGVARCHAR"/>
+        <result property="requestInfo.body" column="req_body" jdbcType="LONGVARCHAR"/>
+        <result property="requestInfo.method" jdbcType="CHAR" column="method" />
+        <result property="responseInfo.url" column="res_url" jdbcType="VARCHAR" />
+        <result property="responseInfo.headers" column="res_headers" jdbcType="LONGVARCHAR" />
+        <result property="responseInfo.responseOk" column="res_ok" jdbcType="TINYINT" />
+        <result property="responseInfo.statusCode" column="status_code" jdbcType="VARCHAR" />
+        <result property="responseInfo.statusMsg" column="status_msg" jdbcType="VARCHAR" />
+        <result property="responseInfo.cookies" column="cookies" jdbcType="LONGVARCHAR" />
+        <result property="responseInfo.encoding" column="encoding" jdbcType="VARCHAR" />
+        <result property="responseInfo.contentType" column="content_type" jdbcType="VARCHAR" />
+        <result property="responseInfo.body" column="body" jdbcType="LONGVARCHAR" />
+        <result property="responseTimeMs" column="res_time_ms" jdbcType="VARCHAR" />
+        <result property="elapsedMs" column="elapsed_ms" jdbcType="VARCHAR" />
+        <result property="contentSize" column="content_size" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <insert id="saveTestStepResult" parameterType="io.apirun.base.domain.TestStepResult">
+        insert into api_test_step_result (
+        `task_id`,`name`, `idx`,`testcase_id`, `path`,
+        `method`, `status`,`attachment`,`validate_extractor`,`req_url`,
+        `req_headers`, `req_body`, `res_url`, `res_headers`, `res_ok`,
+        `status_code`, `status_msg`, `cookies`, `encoding`, `content_type`,
+        `body`, `res_time_ms`, `elapsed_ms`, `content_size`
+        )
+        values
+        (
+        #{taskId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{index,jdbcType=TINYINT}, #{testCaseId,jdbcType=TINYINT}, #{path,jdbcType=VARCHAR},
+        #{method,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{attachment,jdbcType=LONGVARCHAR}, #{validateExtractor,jdbcType=LONGVARCHAR}, #{requestInfo.url,jdbcType=VARCHAR},
+        #{requestInfo.headers,jdbcType=LONGVARCHAR}, #{requestInfo.body,jdbcType=LONGVARCHAR}, #{responseInfo.url,jdbcType=VARCHAR}, #{responseInfo.headers,jdbcType=LONGVARCHAR}, #{responseInfo.responseOk,jdbcType=TINYINT},
+        #{responseInfo.statusCode,jdbcType=VARCHAR}, #{responseInfo.statusMsg,jdbcType=VARCHAR}, #{responseInfo.cookies,jdbcType=LONGVARCHAR}, #{responseInfo.encoding,jdbcType=VARCHAR}, #{responseInfo.contentType,jdbcType=VARCHAR},
+        #{responseInfo.body,jdbcType=LONGVARCHAR},#{responseTimeMs,jdbcType=VARCHAR},#{elapsedMs,jdbcType=VARCHAR}, #{contentSize,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <sql id="Base_Column_List">
+        `task_id`,`name`, `idx`,`testcase_id`, `path`,
+        `method`, `status`,`attachment`,`validate_extractor`,`req_url`,
+        `req_headers`, `req_body`, `res_url`, `res_headers`, `res_ok`,
+        `status_code`, `status_msg`, `cookies`, `encoding`, `content_type`,
+        `body`, `res_time_ms`, `elapsed_ms`, `content_size`
+    </sql>
+    <select id="selectByTaskIdAndTestCaseIndex" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from api_test_step_result
+        where task_id=#{taskId} and testcase_id=#{testcaseId}
+        order by idx asc
+    </select>
+    <delete id="delTestStepResultByTaskId">
+        delete
+        from api_test_step_result
+        where task_id=#{taskId}
+    </delete>
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from api_test_step_result
+        where task_id=#{taskId}
+    </select>
+</mapper>

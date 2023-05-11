@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.apirun.base.mapper.ext.ExtProjectMapper">
+    <sql id="condition">
+        <include refid="io.apirun.base.mapper.ext.ExtApiTestMapper.condition"/>
+    </sql>
+    <sql id="combine">
+        <if test='${condition}.name != null and (${name} == null or ${name} == "")'>
+            AND p.name
+            <include refid="condition">
+                <property name="object" value="${condition}.name"/>
+            </include>
+        </if>
+        <if test="${condition}.updateTime != null">
+            AND p.update_time
+            <include refid="condition">
+                <property name="object" value="${condition}.updateTime"/>
+            </include>
+        </if>
+        <if test="${condition}.createTime != null">
+            AND p.create_time
+            <include refid="condition">
+                <property name="object" value="${condition}.createTime"/>
+            </include>
+        </if>
+        <if test="${condition}.creator != null">
+            AND p.create_user
+            <include refid="condition">
+                <property name="object" value="${condition}.creator"/>
+            </include>
+        </if>
+    </sql>
+
+    <select id="getProjectWithWorkspace" resultType="io.apirun.dto.ProjectDTO">
+        select p.id, p.workspace_id, p.name, p.description, p.update_time, p.issue_template_id, p.case_template_id,
+        p.create_time, w.id as workspaceId, w.name as workspaceName, p.tapd_id, p.jira_key, p.zentao_id,p.repeatable, p.custom_num,
+        p.git_path, p.private_token, p.project_type,
+        user.name as createUserName,
+        p.scenario_custom_num
+        from project p
+        join workspace w on p.workspace_id = w.id
+        left join user on user.id = p.create_user
+        <where>
+            <if test="proRequest.combine != null">
+                <include refid="combine">
+                    <property name="condition" value="proRequest.combine"/>
+                    <property name="name" value="proRequest.name"/>
+                </include>
+            </if>
+            <if test="proRequest.filters != null and proRequest.filters.size() > 0">
+                <foreach collection="proRequest.filters.entrySet()" index="key" item="values">
+                    <if test="values != null and values.size() > 0">
+                        <choose>
+                            <when test="key == 'create_user'">
+                                AND p.create_user IN
+                                <foreach collection="values" item="value" separator="," open="(" close=")">
+                                    #{value}
+                                </foreach>
+                            </when>
+                        </choose>
+                    </if>
+                </foreach>
+            </if>
+            <if test="proRequest.name != null and proRequest.name != ''">
+                and p.name like #{proRequest.name, jdbcType=VARCHAR}
+            </if>
+            <if test="proRequest.workspaceId != null">
+                and w.id = #{proRequest.workspaceId}
+            </if>
+            <if test="proRequest.projectId != null">
+                and p.id = #{proRequest.projectId}
+            </if>
+        </where>
+        <if test="proRequest.orders != null and proRequest.orders.size() > 0">
+            order by
+            <foreach collection="proRequest.orders" separator="," item="order">
+                p.${order.name} ${order.type}
+            </foreach>
+        </if>
+    </select>
+    <select id="getProjectIdByWorkspaceId" resultType="java.lang.String">
+        select id
+          from project
+          where workspace_id = #{workspaceId}
+    </select>
+    <select id="getUserProject" resultType="io.apirun.dto.ProjectDTO">
+        select distinct p.* from `group` g join user_group ug on g.id = ug.group_id
+        join project p on p.id = ug.source_id
+        <where>
+            g.type = 'PROJECT' and ug.user_id = #{proRequest.userId}
+            <if test="proRequest.workspaceId != null and proRequest.workspaceId != ''">
+                and p.workspace_id = #{proRequest.workspaceId}
+            </if>
+            <if test="proRequest.name != null and proRequest.name != ''">
+                and p.name like #{proRequest.name, jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <select id="getSwitchProject" resultType="io.apirun.dto.ProjectDTO">
+        select distinct p.* from `group` g join user_group ug on g.id = ug.group_id
+        join project p on p.id = ug.source_id
+        <where>
+            g.type = 'PROJECT' and ug.user_id = #{proRequest.userId}
+            and p.workspace_id = #{proRequest.workspaceId}
+            <if test="proRequest.name != null and proRequest.name != ''">
+                and p.name like #{proRequest.name, jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <select id="getProjects" resultType="io.apirun.dto.ProjectDTO">
+        select distinct p.* from `group` g join user_group ug on g.id = ug.group_id
+        join project p on p.id = ug.source_id
+        <where>
+            g.type = 'PROJECT' and ug.user_id = #{userId}
+            <if test="projectType != null and projectType != ''">
+                and p.project_type = #{projectType, jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <select id="getSwitchHttpRunnerProject" resultType="io.apirun.dto.ProjectDTO">
+        select distinct p.* from `group` g join user_group ug on g.id = ug.group_id
+        join project p on p.id = ug.source_id
+        <where>
+            g.type = 'PROJECT' and ug.user_id = #{proRequest.userId}
+            and p.project_type = 'httprunner'
+            <if test="proRequest.workspaceId != null and proRequest.workspaceId != ''">
+                and p.workspace_id = #{proRequest.workspaceId}
+            </if>
+            <if test="proRequest.name != null and proRequest.name != ''">
+                and p.name like #{proRequest.name, jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <update id="removeIssuePlatform">
+        update project
+        <set>
+            <if test="platform == 'Jira'">
+                jira_key = null
+            </if>
+            <if test="platform == 'Tapd'">
+                tapd_id = null
+            </if>
+            <if test="platform == 'Zentao'">
+                zentao_id = null
+            </if>
+        </set>
+        where project.id in (select id from (select id
+        from project
+        where workspace_id in
+        (select workspace.id
+        from workspace
+        where organization_id = #{orgId})) as a)
+    </update>
+
+    <select id="getAllProjects" resultType="io.apirun.dto.ProjectDTO">
+        select distinct p.* from `group` g join user_group ug on g.id = ug.group_id
+        join project p on p.id = ug.source_id
+        <where>
+            g.type = 'PROJECT'
+            <if test="proRequest.userId != null and proRequest.userId != ''">
+                and ug.user_id = #{proRequest.userId, jdbcType=VARCHAR}
+            </if>
+
+            <if test="proRequest.projectId != null and proRequest.projectId != ''">
+                and p.id = #{proRequest.projectId, jdbcType=VARCHAR}
+            </if>
+            <if test="proRequest.projectType != null and proRequest.projectType != ''">
+                and p.project_type = #{proRequest.projectType, jdbcType=VARCHAR}
+            </if>
+            <if test="proRequest.name != null and proRequest.name != ''">
+                and p.name like #{proRequest.name, jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <select id="getProjectPerssionByRequest" resultType="java.lang.Integer">
+        select count(p.id) from `group` g join user_group ug on g.id = ug.group_id
+        join project p on p.id = ug.source_id
+        <where>
+            g.type = 'PROJECT'
+            <if test="proRequest.userId != null and proRequest.userId != ''">
+                and ug.user_id = #{proRequest.userId, jdbcType=VARCHAR}
+            </if>
+            <if test="proRequest.projectId != null and proRequest.projectId != ''">
+                and p.id = #{proRequest.projectId, jdbcType=VARCHAR}
+            </if>
+            <if test="proRequest.projectType != null and proRequest.projectType != ''">
+                and p.project_type = #{proRequest.projectType, jdbcType=VARCHAR}
+            </if>
+            <if test="proRequest.name != null and proRequest.name != ''">
+                and p.name like #{proRequest.name, jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+</mapper>

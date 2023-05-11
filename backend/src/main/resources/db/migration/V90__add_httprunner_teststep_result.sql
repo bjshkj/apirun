@@ -1,0 +1,32 @@
+CREATE TABLE IF NOT EXISTS `api_test_step_result`
+(
+`id`        bigint(20) unsigned NOT NULL auto_increment COMMENT 'ID',
+`task_id`   varchar(50) NOT NULL COMMENT 'tesk ID',
+`testcase_id` bigint(20) unsigned NOT NULL COMMENT 'test case idx',
+`idx`     TINYINT unsigned NOT NULL default 0 COMMENT 'index',
+`name`      varchar(255) NOT NULL COMMENT 'step name',
+`path`      varchar(255)  NOT NULL COMMENT 'path',
+`method`   CHAR(8) DEFAULT NULL COMMENT 'http mehtod',
+`status`   CHAR(16) DEFAULT NULL COMMENT 'http status',
+`attachment`             TEXT COMMENT 'attachment',
+`validate_extractor`      TEXT COMMENT 'validate result',
+`req_url` varchar(255)  NOT NULL COMMENT 'request url',
+`req_headers` TEXT comment 'request header',
+`req_body` TEXT comment 'requesr body',
+`res_url` varchar(255)  NOT NULL COMMENT 'response url',
+`res_headers` TEXT comment 'response headers',
+`res_ok` TINYINT unsigned default 0 comment 'boolean, success or fail',
+`status_code` TINYINT unsigned default 0 comment 'response code',
+`status_msg` varchar(255) NOT NULL COMMENT 'response message',
+`cookies` TEXT comment 'cookies',
+`encoding` varchar(64) COMMENT 'response encoding',
+`content_type` varchar(255) COMMENT 'response content type',
+`body` LONGTEXT comment 'response body',
+`res_time_ms`  DOUBLE unsigned comment 'response time, seconds',
+`elapsed_ms` DOUBLE unsigned comment 'elapsed time，seconds',
+`content_size` bigint(20) unsigned default 0 comment 'response content size ',
+`create_time`    DATETIME  NOT NULL default CURRENT_TIMESTAMP COMMENT 'Update timestamp',
+PRIMARY KEY (`id`),
+UNIQUE KEY `id_testcase_idx` (`id`, `testcase_id`, `idx`)
+) ENGINE = InnoDB
+DEFAULT CHARSET = utf8mb4;

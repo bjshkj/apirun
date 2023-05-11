@@ -1,0 +1,444 @@
+<template>
+  <div v-loading="result.loading">
+    <el-card class="table-card">
+      <template v-slot:header>
+        <ms-table-header :create-permission="['ORGANIZATION_USER:READ+CREATE']" :condition.sync="condition" @search="initTableData" @create="create"
+                         :create-tip="$t('member.create')" :title="$t('commons.member')"/>
+      </template>
+      <el-table border class="adjust-table ms-select-all-fixed" :data="tableData" style="width: 100%"
+                @select-all="handleSelectAll"
+                @select="handleSelect"
+                :height="screenHeight"
+                ref="userTable">
+        <el-table-column type="selection" width="50"/>
+        <ms-table-header-select-popover v-show="total>0"
+                                        :page-size="pageSize>total?total:pageSize"
+                                        :total="total"
+                                        :select-data-counts="selectDataCounts"
+                                        @selectPageAll="isSelectDataAll(false)"
+                                        @selectAll="isSelectDataAll(true)"/>
+        <el-table-column v-if="!referenced" width="30" min-width="30" :resizable="false" align="center">
+          <template v-slot:default="scope">
+            <show-more-btn :is-show="scope.row.showMore" :buttons="buttons" :size="selectDataCounts"/>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="id" label="ID"/>
+        <el-table-column prop="name" :label="$t('commons.username')"/>
+        <el-table-column prop="email" :label="$t('commons.email')"/>
+        <el-table-column prop="phone" :label="$t('commons.phone')"/>
+        <el-table-column prop="roles" :label="$t('commons.group')" width="140">
+          <template v-slot:default="scope">
+            <ms-roles-tag :roles="scope.row.groups"/>
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('commons.operating')">
+          <template v-slot:default="scope">
+            <ms-table-operator :edit-permission="['ORGANIZATION_USER:READ+EDIT']"
+                               :delete-permission="['ORGANIZATION_USER:READ+DELETE']"
+              :tip2="$t('commons.remove')" @editClick="edit(scope.row)" @deleteClick="del(scope.row)"/>
+          </template>
+        </el-table-column>
+      </el-table>
+      <ms-table-pagination :change="initTableData" :current-page.sync="currentPage" :page-size.sync="pageSize"
+                           :total="total"/>
+    </el-card>
+
+    <el-dialog :close-on-click-modal="false" :title="$t('member.create')" :visible.sync="createVisible" width="30%" :destroy-on-close="true"
+               @close="handleClose">
+      <el-form :model="form" ref="form" :rules="rules" label-position="right" label-width="100px" size="small">
+        <el-form-item :label="$t('commons.member')" prop="ids"
+                      :rules="{required: true, message: $t('member.input_id_or_email'), trigger: 'blur'}">
+          <el-select
+            v-model="form.ids"
+            multiple
+            filterable
+            remote
+            reserve-keyword
+            :popper-append-to-body="false"
+            class="select-width"
+            :placeholder="$t('member.input_id_or_email')"
+            :remote-method="remoteMethod"
+            :loading="loading">
+            <el-option
+              v-for="item in options"
+              :key="item.id"
+              :label="item.id"
+              :value="item.id">
+              <template>
+                <span class="org-member-name">{{item.id}}</span>
+                <span class="org-member-email">{{item.email}}</span>
+              </template>
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item :label="$t('commons.group')" prop="groupIds">
+          <el-select v-model="form.groupIds" multiple :placeholder="$t('role.please_choose_role')" class="select-width">
+            <el-option
+              v-for="item in form.groups"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <template v-slot:footer>
+        <ms-dialog-footer
+          @cancel="createVisible = false"
+          @confirm="submitForm('form')"/>
+      </template>
+    </el-dialog>
+
+    <el-dialog :close-on-click-modal="false" :title="$t('member.modify')" :visible.sync="updateVisible" width="30%" :destroy-on-close="true"
+               @close="handleClose">
+      <el-form :model="form" label-position="right" label-width="100px" size="small" ref="updateUserForm">
+        <el-form-item label="ID" prop="id">
+          <el-input v-model="form.id" autocomplete="off" :disabled="true"/>
+        </el-form-item>
+        <el-form-item :label="$t('commons.username')" prop="name">
+          <el-input v-model="form.name" autocomplete="off" :disabled="true"/>
+        </el-form-item>
+        <el-form-item :label="$t('commons.email')" prop="email">
+          <el-input v-model="form.email" autocomplete="off" :disabled="true"/>
+        </el-form-item>
+        <el-form-item :label="$t('commons.phone')" prop="phone">
+          <el-input v-model="form.phone" autocomplete="off" :disabled="true"/>
+        </el-form-item>
+        <el-form-item label="用户组" prop="groupIds"
+                      :rules="{required: true, message: '请选择用户组', trigger: 'change'}">
+          <el-select v-model="form.groupIds" multiple placeholder="请选择用户组" class="select-width">
+            <el-option
+              v-for="item in form.allgroups"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template v-slot:footer>
+        <ms-dialog-footer
+          @cancel="updateVisible = false"
+          @confirm="updateOrgMember('updateUserForm')"/>
+      </template>
+    </el-dialog>
+    <user-cascader :lable="batchAddLable" :title="batchAddTitle" @confirm="cascaderConfirm" ref="cascaderDialog"></user-cascader>
+  </div>
+</template>
+
+<script>
+  import MsCreateBox from "../CreateBox";
+  import MsTablePagination from "../../common/pagination/TablePagination";
+  import MsTableHeader from "../../common/components/MsTableHeader";
+  import MsRolesTag from "../../common/components/MsRolesTag";
+  import MsTableOperator from "../../common/components/MsTableOperator";
+  import MsDialogFooter from "../../common/components/MsDialogFooter";
+  import {getCurrentProjectID, getCurrentOrganizationId,getCurrentUser, listenGoBack, removeGoBackListener} from "../../../../common/js/utils";
+  import MsTableHeaderSelectPopover from "@/business/components/common/components/table/MsTableHeaderSelectPopover";
+  import {
+    _handleSelect,
+    _handleSelectAll,
+    getSelectDataCounts,
+    setUnSelectIds,
+    toggleAllSelection
+  } from "@/common/js/tableUtils";
+  import UserCascader from "@/business/components/settings/system/components/UserCascader";
+  import ShowMoreBtn from "@/business/components/track/case/components/ShowMoreBtn";
+  import {GROUP_ORGANIZATION} from "@/common/js/constants";
+
+  export default {
+    name: "MsOrganizationMember",
+    components: {MsCreateBox, MsTablePagination, MsTableHeader, MsRolesTag, MsTableOperator, MsDialogFooter,
+      MsTableHeaderSelectPopover,UserCascader,ShowMoreBtn},
+    activated() {
+      this.initTableData();
+    },
+    data() {
+      return {
+        result: {},
+        createVisible: false,
+        updateVisible: false,
+        screenHeight: 'calc(100vh - 255px)',
+        form: {},
+        queryPath: "/user/org/member/list",
+        condition: {},
+        tableData: [],
+        rules: {
+          userIds: [
+            {required: true, message: this.$t('member.please_choose_member'), trigger: ['blur']}
+          ],
+          roleIds: [
+            {required: true, message: this.$t('role.please_choose_role'), trigger: ['blur']}
+          ]
+        },
+        multipleSelection: [],
+        currentPage: 1,
+        pageSize: 10,
+        total: 0,
+        options: [],
+        loading: false,
+        selectDataCounts: 0,
+        batchAddLable: this.$t('project.please_choose_workspace'),
+        batchAddTitle: this.$t('project.batch_choose_workspace'),
+        selectRows: new Set(),
+        referenced: false,
+        batchAddWorkspaceOptions:[],
+        batchAddUserRoleOptions:[],
+        buttons: [
+          // {
+          //   name: this.$t('user.button.add_workspace_batch'), handleClick: this.addWorkspaceBatch
+          // },
+          // {
+          //   name: this.$t('user.button.add_user_role_batch'), handleClick: this.addUserRoleBatch
+          // }
+        ],
+      }
+    },
+    methods: {
+      currentUser: () => {
+        return getCurrentUser();
+      },
+      initTableData() {
+        let param = {
+          name: this.condition.name,
+          organizationId: this.currentUser().lastOrganizationId
+        };
+        this.result = this.$post(this.buildPagePath(this.queryPath), param, response => {
+          let data = response.data;
+          this.tableData = data.listObject;
+          let url = "/user/group/list/org/" + this.currentUser().lastOrganizationId;
+          for (let i = 0; i < this.tableData.length; i++) {
+            this.$get(url + "/" + encodeURIComponent(this.tableData[i].id), response => {
+              let groups = response.data;
+              this.$set(this.tableData[i], "groups", groups);
+            })
+          }
+          this.total = data.itemCount;
+
+          this.$nextTick(function(){
+            this.checkTableRowIsSelect();
+          });
+        })
+      },
+
+      checkTableRowIsSelect(){
+        //如果默认全选的话，则选中应该选中的行
+        if(this.condition.selectAll){
+          let unSelectIds = this.condition.unSelectIds;
+          this.tableData.forEach(row=>{
+            if(unSelectIds.indexOf(row.id)<0){
+              this.$refs.userTable.toggleRowSelection(row,true);
+
+              //默认全选，需要把选中对行添加到selectRows中。不然会影响到勾选函数统计
+              if (!this.selectRows.has(row)) {
+                this.$set(row, "showMore", true);
+                this.selectRows.add(row);
+              }
+            }else{
+              //不勾选的行，也要判断是否被加入了selectRow中。加入了的话就去除。
+              if (this.selectRows.has(row)) {
+                this.$set(row, "showMore", false);
+                this.selectRows.delete(row);
+              }
+            }
+          })
+        }
+      },
+      buildPagePath(path) {
+        return path + "/" + this.currentPage + "/" + this.pageSize;
+      },
+      handleClose() {
+        this.form = {};
+        this.options = [];
+        removeGoBackListener(this.handleClose);
+        this.updateVisible = false;
+        this.createVisible = false;
+      },
+      edit(row) {
+        this.updateVisible = true;
+        this.form = Object.assign({}, row);
+        let groupIds = this.form.groups.map(r => r.id);
+        this.result = this.$post('/user/group/list', {type: GROUP_ORGANIZATION, resourceId: this.currentUser().lastOrganizationId}, response => {
+          this.$set(this.form, "allgroups", response.data);
+        })
+        // 编辑使填充角色信息
+        this.$set(this.form, 'groupIds', groupIds);
+        listenGoBack(this.handleClose);
+      },
+      updateOrgMember(formName) {
+        let param = {
+          id: this.form.id,
+          name: this.form.name,
+          email: this.form.email,
+          phone: this.form.phone,
+          groupIds: this.form.groupIds,
+          organizationId: this.currentUser().lastOrganizationId
+        };
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.result = this.$post("/organization/member/update", param, () => {
+              this.$success(this.$t('commons.modify_success'));
+              this.updateVisible = false;
+              this.initTableData();
+            });
+          }
+        })
+      },
+      del(row) {
+        this.$confirm(this.$t('member.remove_member'), '', {
+          confirmButtonText: this.$t('commons.confirm'),
+          cancelButtonText: this.$t('commons.cancel'),
+          type: 'warning'
+        }).then(() => {
+          this.result = this.$get('/user/org/member/delete/' + this.currentUser().lastOrganizationId + '/' + encodeURIComponent(row.id), () => {
+            this.$success(this.$t('commons.remove_success'));
+            this.initTableData();
+          });
+        }).catch(() => {
+          this.$info(this.$t('commons.remove_cancel'))
+        });
+      },
+      create() {
+        let orgId = this.currentUser().lastOrganizationId;
+        if (!orgId) {
+          this.$warning(this.$t('organization.select_organization'));
+          return false;
+        }
+        this.form = {};
+        this.createVisible = true;
+        this.result = this.$post('/user/group/list', {type: GROUP_ORGANIZATION, resourceId: orgId}, response => {
+          this.$set(this.form, "groups", response.data);
+        })
+        listenGoBack(this.handleClose);
+      },
+      submitForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          let orgId = this.currentUser().lastOrganizationId;
+          if (valid) {
+            let param = {
+              userIds: this.form.ids,
+              groupIds: this.form.groupIds,
+              organizationId: orgId
+            };
+            this.result = this.$post("user/org/member/add", param, () => {
+              this.$success(this.$t('commons.save_success'));
+              this.initTableData();
+              this.createVisible = false;
+            })
+          } else {
+            return false;
+          }
+        });
+      },
+      remoteMethod(query) {
+        query = query.trim();
+        if (query !== '') {
+          this.loading = true;
+          setTimeout(() => {
+            this.loading = false;
+            this.$get("/user/search/" + query, response => {
+              this.options = response.data;
+            })
+          }, 200);
+        } else {
+          this.options = [];
+        }
+      },
+      initWorkspaceBatchProcessDataStruct(isShow){
+        let organizationId = getCurrentOrganizationId();
+        this.$get("/user/getWorkspaceDataStruct/"+organizationId, response => {
+          this.batchAddWorkspaceOptions = response.data;
+          if(isShow){
+            this.$refs.cascaderDialog.open('ADD_WORKSPACE',this.batchAddWorkspaceOptions);
+          }
+        });
+      },
+      initRoleBatchProcessDataStruct(isShow){
+        let organizationId = getCurrentOrganizationId();
+        this.$get("/user/getUserRoleDataStruct/"+organizationId, response => {
+          this.batchAddUserRoleOptions = response.data;
+          if(isShow){
+            this.$refs.cascaderDialog.open('ADD_USER_ROLE',this.batchAddUserRoleOptions);
+          }
+        });
+      },
+      handleSelectAll(selection) {
+        _handleSelectAll(this, selection, this.tableData, this.selectRows, this.condition);
+        setUnSelectIds(this.tableData, this.condition, this.selectRows);
+        this.selectDataCounts = getSelectDataCounts(this.condition, this.total, this.selectRows);
+        this.$emit('selection', selection);
+      },
+      handleSelect(selection, row) {
+        _handleSelect(this, selection, row, this.selectRows);
+        setUnSelectIds(this.tableData, this.condition, this.selectRows);
+        this.selectDataCounts = getSelectDataCounts(this.condition, this.total, this.selectRows);
+        this.$emit('selection', selection);
+      },
+      isSelectDataAll(data) {
+        this.condition.selectAll = data;
+        setUnSelectIds(this.tableData, this.condition, this.selectRows);
+        this.selectDataCounts = getSelectDataCounts(this.condition, this.total, this.selectRows);
+        toggleAllSelection(this.$refs.userTable, this.tableData, this.selectRows);
+      },
+      addWorkspaceBatch(){
+        if(this.batchAddWorkspaceOptions.length == 0){
+          this.initWorkspaceBatchProcessDataStruct(true);
+        }else{
+          this.$refs.cascaderDialog.open('ADD_WORKSPACE',this.batchAddWorkspaceOptions);
+        }
+      },
+      addUserRoleBatch(){
+        if(this.batchAddUserRoleOptions.length == 0){
+          this.initRoleBatchProcessDataStruct(true);
+        }else{
+          this.$refs.cascaderDialog.open('ADD_USER_ROLE',this.batchAddUserRoleOptions);
+        }
+      },
+      cascaderConfirm(batchProcessTypeParam,selectValueArr){
+        if(selectValueArr.length == 0){
+          this.$success(this.$t('commons.modify_success'));
+        }
+        let params = {};
+        params = this.buildBatchParam(params);
+        params.organizationId = getCurrentOrganizationId();
+        params.batchType = batchProcessTypeParam;
+        params.batchProcessValue = selectValueArr;
+        this.$post('/user/special/batchProcessUserInfo', params, () => {
+          this.$success(this.$t('commons.modify_success'));
+          this.initTableData();
+          this.$refs.cascaderDialog.close();
+        });
+      },
+      buildBatchParam(param) {
+        param.ids = Array.from(this.selectRows).map(row => row.id);
+        param.projectId = getCurrentProjectID();
+        param.condition = this.condition;
+        return param;
+      },
+    },
+  }
+</script>
+
+<style scoped>
+
+  .org-member-name {
+    float: left;
+  }
+
+  .org-member-email {
+    float: right;
+    color: #8492a6;
+    font-size: 13px;
+  }
+
+  .select-width {
+    width: 100%;
+  }
+
+  /deep/ .ms-select-all-fixed th:nth-child(2) .el-icon-arrow-down {
+    top: -5px;
+  }
+</style>
